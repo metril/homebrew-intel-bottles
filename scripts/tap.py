@@ -172,6 +172,10 @@ def build(name, mirrored):
     tag = release_tag(name, ver)
     ensure_installed_deps(name, mirrored)
     run("brew", "uninstall", "--ignore-dependencies", "--force", name, check=False)
+    # Preinstalled openssl variants hold /usr/local/bin/openssl links that block linking ours.
+    for f in run("brew", "list", "--formula", "-1", capture=True).split():
+        if f.startswith("openssl") and f != name:
+            run("brew", "unlink", f, check=False)
     run("brew", "install", "--build-bottle", f"{TAP}/{name}")
     work = ROOT / "bottles" / name
     shutil.rmtree(work, ignore_errors=True)
