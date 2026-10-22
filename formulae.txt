@@ -1,2 +1,21 @@
-# One formula per line (paste `brew leaves` here). Comments and blank lines are ignored.
+# One formula per line (from `brew leaves`). Comments and blank lines are ignored.
+# vault is omitted: it comes from hashicorp/tap (prebuilt binaries), not homebrew-core.
+chezmoi
+cloudflared
+eza
+fzf
+git
+go
+iperf3
+ipmitool
 jq
+pkgconf
+python-requests
+python@3.13
+rclone
+restic
+smartmontools
+starship
+subversion
+switchaudio-osx
+zoxide

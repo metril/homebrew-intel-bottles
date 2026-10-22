@@ -9,7 +9,8 @@ source "$here/lib.sh"
 # (macOS ships bash 3.2: no associative arrays, so use newline-delimited strings)
 ordered=""
 while read -r f; do
-  for d in $(brew deps --topological "$f") "$f"; do
+  deps="$(brew deps --topological "$f" 2>/dev/null)" || { echo "::warning::skip $f: brew cannot resolve it"; continue; }
+  for d in $deps "$f"; do
     printf '%s\n' "$ordered" | grep -Fxq -- "$d" && continue
     ordered="$ordered$d"$'\n'
   done
@@ -17,6 +18,7 @@ done < <(read_formulae "$here/../formulae.txt")
 
 todo=""
 for f in $ordered; do
+  if ! brew info --json=v2 "$f" >/dev/null 2>&1; then echo "::warning::skip $f: brew cannot resolve it"; continue; fi
   if has_intel_bottle "$f"; then echo "skip $f: upstream Intel bottle"; continue; fi
   ver="$(pkg_version "$f")"; tag="$(tag_for "$f" "$ver")"
   if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
