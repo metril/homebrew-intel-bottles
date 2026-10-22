@@ -50,7 +50,9 @@ def resolve_all(leaves):
         if info is None or info["name"] in mirrored:
             return
         mirrored.add(info["name"])
-        for d in info.get("dependencies", []):
+        # Build deps are mirrored too: upstream has no Intel bottles for them, and the runner
+        # image's preinstalled copies are outdated (brew refuses to upgrade them here).
+        for d in info.get("dependencies", []) + info.get("build_dependencies", []):
             collect(d)
 
     for leaf in leaves:
@@ -141,22 +143,27 @@ def setup_tap():
 
 
 def ensure_installed_deps(name, mirrored):
-    """Install all runtime+build deps before building: tap bottles where available (so nothing
-    recompiles), otherwise core bottles, otherwise build from source (Homebrew refuses implicit
-    source builds on unsupported configurations)."""
+    """Install all runtime+build deps at the right version before building. Prefer tap bottles
+    (nothing recompiles); fall back to core bottles, then source. Stale preinstalled copies are
+    replaced, since brew refuses to upgrade them implicitly on this unsupported config."""
     out = run("brew", "deps", "--topological", "--include-build", f"{TAP}/{name}", capture=True)
+    outdated = set(run("brew", "outdated", "--formula", "-q", capture=True).split())
     for dep in out.split():
         d = dep.rsplit("/", 1)[-1]
-        if run("brew", "list", "--versions", d, check=False, capture=True):
-            # Pin preinstalled deps: otherwise brew tries to upgrade outdated ones, which fails
-            # on this unsupported config when upstream has no bottle.
-            run("brew", "pin", d, check=False)
-            continue
+        cur = run("brew", "list", "--versions", d, check=False, capture=True).split()[1:]
         tapf = FORMULA_DIR / f"{d}.rb"
         if d in mirrored and tapf.exists() and has_bottle(tapf.read_text()):
+            if tap_version(d) in cur:
+                continue
+            run("brew", "uninstall", "--ignore-dependencies", "--force", d, check=False)
             run("brew", "install", f"{TAP}/{d}")
-        elif run("brew", "install", d, check=False) != 0:
-            run("brew", "install", "--build-from-source", d)
+        elif cur and d not in outdated:
+            continue
+        else:
+            if cur:
+                run("brew", "uninstall", "--ignore-dependencies", "--force", d, check=False)
+            if run("brew", "install", d, check=False) != 0:
+                run("brew", "install", "--build-from-source", d)
 
 
 def build(name, mirrored):
