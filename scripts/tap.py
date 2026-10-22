@@ -148,6 +148,9 @@ def ensure_installed_deps(name, mirrored):
     for dep in out.split():
         d = dep.rsplit("/", 1)[-1]
         if run("brew", "list", "--versions", d, check=False, capture=True):
+            # Pin preinstalled deps: otherwise brew tries to upgrade outdated ones, which fails
+            # on this unsupported config when upstream has no bottle.
+            run("brew", "pin", d, check=False)
             continue
         tapf = FORMULA_DIR / f"{d}.rb"
         if d in mirrored and tapf.exists() and has_bottle(tapf.read_text()):
