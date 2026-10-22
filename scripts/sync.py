@@ -38,26 +38,50 @@ def read_list():
 
 
 def resolve_all(leaves):
-    """Return (ordered names, infos): leaves plus recursive runtime deps, deps first."""
-    infos, order = {}, []
+    """Return (ordered names, infos). Mirrored set = leaves + recursive runtime deps.
+    Order puts runtime deps, and mirrored build deps, before dependents."""
+    infos = {}
 
-    def visit(name, stack=()):
-        if name in infos or name in stack:
+    def info_of(name):
+        if name not in infos:
+            infos[name] = brew_info(f"homebrew/core/{name}")
+            if infos[name] is None:
+                print(f"::warning::skip {name}: brew cannot resolve it")
+            else:
+                infos[infos[name]["name"]] = infos[name]
+        return infos[name]
+
+    mirrored = set()
+
+    def collect(name):
+        info = info_of(name)
+        if info is None or info["name"] in mirrored:
             return
-        info = brew_info(f"homebrew/core/{name}")
-        if info is None:
-            print(f"::warning::skip {name}: brew cannot resolve it")
-            infos[name] = None
-            return
-        infos[name] = info
+        mirrored.add(info["name"])
         for d in info.get("dependencies", []):
-            visit(d, stack + (name,))
-        order.append(info["name"])
-        infos[info["name"]] = info
+            collect(d)
 
     for leaf in leaves:
-        visit(leaf)
-    return order, infos
+        collect(leaf)
+
+    order, done = [], set()
+
+    def visit(name, stack=()):
+        if name in done or name in stack:
+            return
+        info = infos[name]
+        for d in info.get("dependencies", []) + [b for b in info.get("build_dependencies", []) if b in mirrored]:
+            if d in infos and infos[d] is not None:
+                visit(d, stack + (name,))
+        done.add(name)
+        order.append(name)
+
+    for leaf in leaves:
+        if infos.get(leaf):
+            visit(infos[leaf]["name"])
+    for name in sorted(mirrored):
+        visit(name)
+    return order, {n: infos[n] for n in order}
 
 
 BOTTLE_RE = re.compile(r"^  bottle do\n.*?^  end\n", re.S | re.M)
@@ -68,8 +92,11 @@ def normalize(text):
     return re.sub(r"\n{3,}", "\n\n", BOTTLE_RE.sub("", text))
 
 
+NOAUTOBUMP_RE = re.compile(r"^[ \t]*no_autobump!(?:.*,[ \t]*\n[ \t]+)*.*\n", re.M)  # official-tap-only DSL
+
+
 def rewrite(text, mirrored):
-    text = BOTTLE_RE.sub("", text)
+    text = NOAUTOBUMP_RE.sub("", BOTTLE_RE.sub("", text))
 
     def sub(m):
         name, rest = m.group(2), m.group(3)
@@ -102,19 +129,27 @@ def release_tag(name, ver):
     return f"{name}-{ver}".replace("@", "-").replace("+", "p")
 
 
-def ensure_installed_deps(info, mirrored):
-    """Install already-bottled tap deps so nothing gets recompiled."""
-    for d in info.get("dependencies", []):
-        if d in mirrored and run("brew", "list", "--versions", d, check=False, capture=True) == "":
-            if has_bottle((FORMULA_DIR / f"{d}.rb").read_text()):
-                run("brew", "install", f"{TAP}/{d}")
+def ensure_installed_deps(name, mirrored):
+    """Install all runtime+build deps before building: tap bottles where available (so nothing
+    recompiles), otherwise core bottles, otherwise build from source (Homebrew refuses implicit
+    source builds on unsupported configurations)."""
+    out = run("brew", "deps", "--topological", "--include-build", f"{TAP}/{name}", capture=True)
+    for dep in out.split():
+        d = dep.rsplit("/", 1)[-1]
+        if run("brew", "list", "--versions", d, check=False, capture=True):
+            continue
+        tapf = FORMULA_DIR / f"{d}.rb"
+        if d in mirrored and tapf.exists() and has_bottle(tapf.read_text()):
+            run("brew", "install", f"{TAP}/{d}")
+        elif run("brew", "install", d, check=False) != 0:
+            run("brew", "install", "--build-from-source", d)
 
 
-def build(name, info, mirrored):
+def build(name, mirrored):
     f = FORMULA_DIR / f"{name}.rb"
     ver = tap_version(name)
     tag = release_tag(name, ver)
-    ensure_installed_deps(info, mirrored)
+    ensure_installed_deps(name, mirrored)
     run("brew", "uninstall", "--ignore-dependencies", "--force", name, check=False)
     run("brew", "install", "--build-bottle", f"{TAP}/{name}")
     work = ROOT / "bottles" / name
@@ -128,14 +163,19 @@ def build(name, info, mirrored):
     # Homebrew downloads root_url/<filename> where filename has a single dash (Bottle::Filename#url_encode).
     upload = work / "upload"
     upload.mkdir()
-    shutil.copy(work / t["local_filename"], upload / t["filename"])
+    asset = urllib.parse.unquote(t["filename"])  # json holds the URL-encoded name; the asset keeps the plain name
+    shutil.copy(work / t["local_filename"], upload / asset)
     exists = run("gh", "release", "view", tag, "--repo", REPO, check=False) == 0
     if exists:
-        run("gh", "release", "upload", tag, str(upload / t["filename"]), "--repo", REPO, "--clobber")
+        for old in run("gh", "release", "view", tag, "--repo", REPO, "--json", "assets", "-q",
+                       ".assets[].name", capture=True).split():
+            if old != asset:
+                run("gh", "release", "delete-asset", tag, old, "--repo", REPO, "-y", check=False)
+        run("gh", "release", "upload", tag, str(upload / asset), "--repo", REPO, "--clobber")
     else:
-        run("gh", "release", "create", tag, str(upload / t["filename"]), "--repo", REPO,
+        run("gh", "release", "create", tag, str(upload / asset), "--repo", REPO,
             "--title", f"{name} {ver}", "--notes", f"Intel bottle for {name} {ver} (sequoia).")
-    url = f"https://github.com/{REPO}/releases/download/{tag}/{urllib.parse.quote(t['filename'])}"
+    url = f"https://github.com/{REPO}/releases/download/{tag}/{t['filename']}"
     run("curl", "-fsSLI", "-o", "/dev/null", url)  # fail if the asset is not downloadable at the expected URL
     run("brew", "bottle", "--merge", "--write", "--no-commit", str(js))
     run("git", "add", str(f), cwd=ROOT)
@@ -192,7 +232,7 @@ def main():
         try:
             if bad:
                 raise RuntimeError(f"dependency failed: {bad}")
-            build(name, infos[name], mirrored)
+            build(name, mirrored)
             built += 1
         except Exception as e:  # noqa: BLE001
             print(f"::error::{name}: {e}")
