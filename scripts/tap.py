@@ -125,6 +125,7 @@ def brew_update():
     run("brew", "update")
     os.environ["HOMEBREW_NO_AUTO_UPDATE"] = "1"  # already updated; keep the run stable
     os.environ["HOMEBREW_NO_INSTALL_CLEANUP"] = "1"
+    os.environ["HOMEBREW_NO_INSTALL_UPGRADE"] = "1"  # do not upgrade preinstalled outdated deps (no Intel bottles to pour)
 
 
 def setup_tap():
