@@ -10,39 +10,23 @@ on:
 
 permissions:
   contents: write
+  actions: write   # lets a run re-dispatch itself when work remains
 
 concurrency:
   group: build-bottles
   cancel-in-progress: false
 
 env:
-  HOMEBREW_NO_AUTO_UPDATE: "1"
-  HOMEBREW_NO_INSTALL_CLEANUP: "1"
   HOMEBREW_NO_ANALYTICS: "1"
   GH_TOKEN: ${{ github.token }}
 
 jobs:
-  plan:
-    runs-on: macos-15-intel
-    outputs:
-      formulae: ${{ steps.plan.outputs.formulae }}
-    steps:
-      - uses: actions/checkout@v4
-      - id: plan
-        run: bash scripts/plan.sh
-
   build:
-    needs: plan
-    if: needs.plan.outputs.formulae != '[]'
     runs-on: macos-15-intel
     timeout-minutes: 360
-    # Builds run sequentially in topological order in a single job so dependency
-    # chains work. Heavy formulae (llvm, rust, gcc) could be split into their own jobs.
     steps:
       - uses: actions/checkout@v4
-      - name: Build and release bottles
+      - name: Mirror, build and publish bottles
         env:
-          HOMEBREW_NO_INSTALL_FROM_API: "1"
-        run: |
-          brew tap --force homebrew/core
-          bash scripts/build.sh '${{ needs.plan.outputs.formulae }}'
+          STOP_AFTER_MIN: "300"   # stop starting builds after 5h; next run resumes
+        run: python3 scripts/sync.py

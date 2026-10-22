@@ -1,0 +1,35 @@
+#!/usr/bin/env bash
+# One-time migration: reinstall formulae from metril/intel-bottles so plain `brew upgrade` works.
+# Usage: migrate-to-tap [--dry-run]
+set -euo pipefail
+TAP="${BOTTLE_TAP:-metril/intel-bottles}"
+dry=0; [[ "${1:-}" == "--dry-run" ]] && dry=1
+
+brew update
+brew tap "$TAP"
+# Newer Homebrew only loads third-party taps you trust.
+brew trust "$TAP" 2>/dev/null || true
+
+tapdir="$(brew --repository "$TAP")/Formula"
+installed="$(brew list --formula -1)"
+
+# Dependency order: deps first (brew deps --topological lists deps before dependents).
+ordered=""
+for f in $installed; do
+  for d in $(brew deps --topological "$f" 2>/dev/null) "$f"; do
+    printf '%s' "$ordered" | grep -Fxq -- "$d" || ordered="$ordered$d"$'\n'
+  done
+done
+
+for f in $ordered; do
+  printf '%s' "$installed" | grep -Fxq -- "$f" || continue          # installed only
+  [[ -f "$tapdir/$f.rb" ]] || continue                              # tap provides it
+  grep -q 'sequoia:' "$tapdir/$f.rb" || { echo "skip $f: not bottled in tap yet"; continue; }
+  origin="$(brew info --json=v2 --installed "$f" | jq -r '.formulae[0].tap // empty' 2>/dev/null || true)"
+  [[ "$origin" == "$TAP" ]] && { echo "skip $f: already from tap"; continue; }
+  echo "==> $f: switching to $TAP"
+  ((dry)) && continue
+  brew uninstall --ignore-dependencies "$f"
+  brew install "$TAP/$f"
+done
+echo "Done. From now on use plain: brew update && brew upgrade"
