@@ -6,7 +6,7 @@ source "$here/lib.sh"
 : "${GITHUB_REPOSITORY:?}"
 
 out="$PWD/bottles"; mkdir -p "$out"
-failed=()
+failed=""
 
 # Install this repo's already-released bottles for deps that are not installed yet,
 # so nothing gets recompiled. Deps with upstream bottles are handled by brew itself.
@@ -42,8 +42,8 @@ build_one() {
 while read -r f; do
   [[ -z "$f" ]] && continue
   echo "::group::$f"
-  if ! build_one "$f"; then echo "::error::build failed: $f"; failed+=("$f"); fi
+  if ! build_one "$f"; then echo "::error::build failed: $f"; failed="$failed $f"; fi
   echo "::endgroup::"
 done < <(jq -r '.[]' <<<"$1")
 
-if ((${#failed[@]})); then echo "Failed: ${failed[*]}"; exit 1; fi
+if [[ -n "$failed" ]]; then echo "Failed:$failed"; exit 1; fi

@@ -6,7 +6,7 @@ set -euo pipefail
 REPO="${BOTTLE_REPO:-metril/homebrew-intel-bottles}"
 BOTTLE_TAG="${BOTTLE_TAG:-sequoia}"   # bottles built on macos-15-intel; pour fine on newer macOS
 allow_source=0; cask=1; extra=()
-for a in "$@"; do
+for a in ${@+"$@"}; do
   case "$a" in
     --allow-source) allow_source=1 ;;
     --no-cask) cask=0 ;;
@@ -20,21 +20,21 @@ tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
 brew update
 
 # Targets: outdated + requested
-declare -A want=()
-while read -r f; do [[ -n "$f" ]] && want[$f]=1; done < <(brew outdated --json=v2 --formula | jq -r '.formulae[].name')
-for f in "${extra[@]:-}"; do [[ -n "$f" ]] && want[$f]=1; done
+# (macOS ships bash 3.2: no associative arrays, so use newline-delimited strings)
+want="$(brew outdated --json=v2 --formula | jq -r '.formulae[].name')"$'\n'
+for f in ${extra[@]+"${extra[@]}"}; do want="$want$f"$'\n'; done
 
 # Dependency order: deps first
-ordered=(); declare -A seen=()
-for f in "${!want[@]}"; do
+ordered=""; seen=""
+for f in $want; do
   for d in $(brew deps --topological "$f") "$f"; do
-    [[ -n "${seen[$d]:-}" ]] && continue
-    seen[$d]=1
-    [[ -n "${want[$d]:-}" ]] && ordered+=("$d")
+    printf '%s' "$seen" | grep -Fxq -- "$d" && continue
+    seen="$seen$d"$'\n'
+    printf '%s' "$want" | grep -Fxq -- "$d" && ordered="$ordered$d"$'\n'
   done
 done
 
-for f in "${ordered[@]:-}"; do
+for f in $ordered; do
   [[ -z "$f" ]] && continue
   info="$(brew info --json=v2 "$f")"
   ver="$(jq -r '.formulae[0] | .versions.stable + (if (.revision // 0) > 0 then "_\(.revision)" else "" end)' <<<"$info")"
