@@ -10,7 +10,7 @@ on:
 
 permissions:
   contents: write
-  actions: write   # lets a run re-dispatch itself when work remains
+  actions: write   # lets finalize dispatch the next round
 
 concurrency:
   group: build-bottles
@@ -21,12 +21,61 @@ env:
   GH_TOKEN: ${{ github.token }}
 
 jobs:
-  build:
+  plan:
     runs-on: macos-15-intel
-    timeout-minutes: 360
+    outputs:
+      ready: ${{ steps.plan.outputs.ready }}
+      ready_count: ${{ steps.plan.outputs.ready_count }}
+      remaining: ${{ steps.plan.outputs.remaining }}
     steps:
       - uses: actions/checkout@v4
-      - name: Mirror, build and publish bottles
-        env:
-          STOP_AFTER_MIN: "300"   # stop starting builds after 5h; next run resumes
-        run: python3 scripts/sync.py
+      - id: plan
+        run: python3 scripts/plan.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cand
+          path: cand/
+          if-no-files-found: ignore
+
+  build:
+    needs: plan
+    if: needs.plan.outputs.ready_count != '0'
+    runs-on: macos-15-intel
+    timeout-minutes: 360
+    strategy:
+      fail-fast: false
+      max-parallel: 5
+      matrix: ${{ fromJSON(needs.plan.outputs.ready) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: cand
+          path: cand
+      - run: python3 scripts/build.py '${{ matrix.name }}'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bottle-${{ matrix.safe }}
+          path: out/*.json
+
+  finalize:
+    needs: [plan, build]
+    if: always() && needs.plan.outputs.ready_count != '0' && needs.plan.outputs.ready_count != ''
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: cand
+          path: cand
+      - uses: actions/download-artifact@v4
+        continue-on-error: true   # none when every build failed
+        with:
+          pattern: bottle-*
+          path: jsons
+          merge-multiple: true
+      - run: python3 scripts/finalize.py
+      - name: Dispatch next round
+        if: needs.plan.outputs.remaining != '0'
+        run: |
+          if ls jsons/*.json >/dev/null 2>&1; then gh workflow run build.yml --repo "$GITHUB_REPOSITORY"; fi

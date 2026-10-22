@@ -1,11 +1,5 @@
 #!/usr/bin/env python3
-"""Mirror homebrew-core formulae into this tap, build Intel bottles, publish them.
-
-Per formula (topological order): write the rewritten core formula, build a bottle if the
-formula changed or has no sequoia bottle, upload it to a GitHub release, write the bottle
-block into the formula, then commit and push. Resumable: stops starting new builds after
-STOP_AFTER_MIN minutes and re-dispatches the workflow if work remains.
-"""
+"""Shared helpers for the plan/build/finalize scripts."""
 import json, os, re, shutil, subprocess, sys, time, urllib.parse, urllib.request
 from pathlib import Path
 
@@ -13,8 +7,6 @@ REPO = os.environ.get("GITHUB_REPOSITORY", "metril/homebrew-intel-bottles")
 TAP = "metril/intel-bottles"
 ROOT = Path(__file__).resolve().parent.parent
 FORMULA_DIR = ROOT / "Formula"
-STOP_AFTER_MIN = int(os.environ.get("STOP_AFTER_MIN", "300"))
-START = time.time()
 
 
 def run(*cmd, check=True, capture=False, cwd=None):
@@ -129,6 +121,24 @@ def release_tag(name, ver):
     return f"{name}-{ver}".replace("@", "-").replace("+", "p")
 
 
+def brew_update():
+    run("brew", "update")
+    os.environ["HOMEBREW_NO_AUTO_UPDATE"] = "1"  # already updated; keep the run stable
+    os.environ["HOMEBREW_NO_INSTALL_CLEANUP"] = "1"
+
+
+def setup_tap():
+    """Make the checkout the tap (after `brew update`, which would otherwise touch it)."""
+    tap_dir = Path(run("brew", "--repository", capture=True)) / "Library/Taps/metril/homebrew-intel-bottles"
+    tap_dir.parent.mkdir(parents=True, exist_ok=True)
+    if tap_dir.is_symlink():
+        tap_dir.unlink()
+    elif tap_dir.is_dir():
+        shutil.rmtree(tap_dir)
+    tap_dir.symlink_to(ROOT)
+    run("brew", "trust", TAP, check=False)  # newer Homebrew requires trusting third-party taps
+
+
 def ensure_installed_deps(name, mirrored):
     """Install all runtime+build deps before building: tap bottles where available (so nothing
     recompiles), otherwise core bottles, otherwise build from source (Homebrew refuses implicit
@@ -146,7 +156,7 @@ def ensure_installed_deps(name, mirrored):
 
 
 def build(name, mirrored):
-    f = FORMULA_DIR / f"{name}.rb"
+    """Build and upload one bottle; leaves bottles/<name>/*.json for the finalize job."""
     ver = tap_version(name)
     tag = release_tag(name, ver)
     ensure_installed_deps(name, mirrored)
@@ -158,15 +168,13 @@ def build(name, mirrored):
     run("brew", "bottle", "--json", f"--root-url=https://github.com/{REPO}/releases/download/{tag}",
         f"{TAP}/{name}", cwd=work)
     js = next(work.glob("*.json"))
-    tags = next(iter(json.loads(js.read_text()).values()))["bottle"]["tags"]
-    t = next(iter(tags.values()))
-    # Homebrew downloads root_url/<filename> where filename has a single dash (Bottle::Filename#url_encode).
+    t = next(iter(next(iter(json.loads(js.read_text()).values()))["bottle"]["tags"].values()))
+    # json holds the URL-encoded name (what Homebrew requests); the asset keeps the plain name.
+    asset = urllib.parse.unquote(t["filename"])
     upload = work / "upload"
     upload.mkdir()
-    asset = urllib.parse.unquote(t["filename"])  # json holds the URL-encoded name; the asset keeps the plain name
     shutil.copy(work / t["local_filename"], upload / asset)
-    exists = run("gh", "release", "view", tag, "--repo", REPO, check=False) == 0
-    if exists:
+    if run("gh", "release", "view", tag, "--repo", REPO, check=False) == 0:
         for old in run("gh", "release", "view", tag, "--repo", REPO, "--json", "assets", "-q",
                        ".assets[].name", capture=True).split():
             if old != asset:
@@ -175,79 +183,8 @@ def build(name, mirrored):
     else:
         run("gh", "release", "create", tag, str(upload / asset), "--repo", REPO,
             "--title", f"{name} {ver}", "--notes", f"Intel bottle for {name} {ver} (sequoia).")
-    url = f"https://github.com/{REPO}/releases/download/{tag}/{t['filename']}"
-    run("curl", "-fsSLI", "-o", "/dev/null", url)  # fail if the asset is not downloadable at the expected URL
-    run("brew", "bottle", "--merge", "--write", "--no-commit", str(js))
-    run("git", "add", str(f), cwd=ROOT)
-    run("git", "commit", "-q", "-m", f"{name}: {ver} bottle", cwd=ROOT)
-    run("git", "pull", "-q", "--rebase", "--autostash", "origin", "main", cwd=ROOT)
-    run("git", "push", "-q", "origin", "HEAD:main", cwd=ROOT)
-
-
-def main():
-    run("brew", "update")
-    os.environ["HOMEBREW_NO_AUTO_UPDATE"] = "1"  # already updated; keep the run stable
-    os.environ["HOMEBREW_NO_INSTALL_CLEANUP"] = "1"
-    run("git", "config", "user.name", "metril", cwd=ROOT)
-    run("git", "config", "user.email", "1517921+metril@users.noreply.github.com", cwd=ROOT)
-
-    order, infos = resolve_all(read_list())
-    mirrored = set(order)
-    FORMULA_DIR.mkdir(exist_ok=True)
-
-    # Plan: write candidates, decide what needs a build.
-    todo = []
-    for name in order:
-        info = infos[name]
-        new = rewrite(fetch_source(info), mirrored)
-        f = FORMULA_DIR / f"{name}.rb"
-        old = f.read_text() if f.exists() else None
-        if old is not None and normalize(old) == normalize(new) and has_bottle(old):
-            print(f"up to date: {name}")
-            continue
-        if old is not None and normalize(old) == normalize(new):
-            new = old  # same source, just missing a bottle
-        f.write_text(new)
-        todo.append(name)
-    print("to build:", todo, flush=True)
-
-    # Make the checkout the tap, after `brew update` so it is not touched by it.
-    tap_dir = Path(run("brew", "--repository", capture=True)) / "Library/Taps/metril/homebrew-intel-bottles"
-    tap_dir.parent.mkdir(parents=True, exist_ok=True)
-    if tap_dir.is_symlink():
-        tap_dir.unlink()
-    elif tap_dir.is_dir():
-        shutil.rmtree(tap_dir)
-    tap_dir.symlink_to(ROOT)
-    run("brew", "trust", TAP, check=False)  # newer Homebrew requires trusting third-party taps
-
-    failed, built, stopped = set(), 0, False
-    for name in todo:
-        f = FORMULA_DIR / f"{name}.rb"
-        if (time.time() - START) / 60 > STOP_AFTER_MIN:
-            stopped = True
-            break
-        bad = [d for d in infos[name].get("dependencies", []) if d in failed]
-        print(f"::group::{name}", flush=True)
-        try:
-            if bad:
-                raise RuntimeError(f"dependency failed: {bad}")
-            build(name, mirrored)
-            built += 1
-        except Exception as e:  # noqa: BLE001
-            print(f"::error::{name}: {e}")
-            failed.add(name)
-        print("::endgroup::", flush=True)
-
-    # Drop uncommitted candidates (failed or not reached); only committed formulae stay.
-    run("git", "checkout", "--", "Formula", cwd=ROOT, check=False)
-    run("git", "clean", "-fdq", "Formula", cwd=ROOT, check=False)
-
-    print(f"built={built} failed={sorted(failed)} stopped_for_time={stopped}")
-    if stopped and built:
-        run("gh", "workflow", "run", "build.yml", "--repo", REPO, check=False)
-    sys.exit(1 if failed else 0)
-
-
-if __name__ == "__main__":
-    main()
+    run("curl", "-fsSLI", "-o", "/dev/null",
+        f"https://github.com/{REPO}/releases/download/{tag}/{t['filename']}")  # must be downloadable
+    out = ROOT / "out"
+    out.mkdir(exist_ok=True)
+    shutil.copy(js, out / f"{name}.json")
