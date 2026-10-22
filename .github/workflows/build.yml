@@ -1,0 +1,48 @@
+name: build-bottles
+
+on:
+  schedule:
+    - cron: "17 5 * * *"
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths: [formulae.txt]
+
+permissions:
+  contents: write
+
+concurrency:
+  group: build-bottles
+  cancel-in-progress: false
+
+env:
+  HOMEBREW_NO_AUTO_UPDATE: "1"
+  HOMEBREW_NO_INSTALL_CLEANUP: "1"
+  HOMEBREW_NO_ANALYTICS: "1"
+  GH_TOKEN: ${{ github.token }}
+
+jobs:
+  plan:
+    runs-on: macos-15-intel
+    outputs:
+      formulae: ${{ steps.plan.outputs.formulae }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: plan
+        run: bash scripts/plan.sh
+
+  build:
+    needs: plan
+    if: needs.plan.outputs.formulae != '[]'
+    runs-on: macos-15-intel
+    timeout-minutes: 360
+    # Builds run sequentially in topological order in a single job so dependency
+    # chains work. Heavy formulae (llvm, rust, gcc) could be split into their own jobs.
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and release bottles
+        env:
+          HOMEBREW_NO_INSTALL_FROM_API: "1"
+        run: |
+          brew tap --force homebrew/core
+          bash scripts/build.sh '${{ needs.plan.outputs.formulae }}'

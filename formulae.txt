@@ -1,0 +1,2 @@
+# One formula per line (paste `brew leaves` here). Comments and blank lines are ignored.
+jq

@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Upgrade/install Homebrew formulae on an Intel Mac using bottles from BOTTLE_REPO
+# when upstream has no Intel bottle. Usage: brew-intel-upgrade [--allow-source] [--no-cask] [formula...]
+set -euo pipefail
+
+REPO="${BOTTLE_REPO:-metril/homebrew-intel-bottles}"
+BOTTLE_TAG="${BOTTLE_TAG:-sequoia}"   # bottles built on macos-15-intel; pour fine on newer macOS
+allow_source=0; cask=1; extra=()
+for a in "$@"; do
+  case "$a" in
+    --allow-source) allow_source=1 ;;
+    --no-cask) cask=0 ;;
+    -h|--help) sed -n '2,3p' "$0"; exit 0 ;;
+    *) extra+=("$a") ;;
+  esac
+done
+
+tmp="$(mktemp -d)"; trap 'rm -rf "$tmp"' EXIT
+
+brew update
+
+# Targets: outdated + requested
+declare -A want=()
+while read -r f; do [[ -n "$f" ]] && want[$f]=1; done < <(brew outdated --json=v2 --formula | jq -r '.formulae[].name')
+for f in "${extra[@]:-}"; do [[ -n "$f" ]] && want[$f]=1; done
+
+# Dependency order: deps first
+ordered=(); declare -A seen=()
+for f in "${!want[@]}"; do
+  for d in $(brew deps --topological "$f") "$f"; do
+    [[ -n "${seen[$d]:-}" ]] && continue
+    seen[$d]=1
+    [[ -n "${want[$d]:-}" ]] && ordered+=("$d")
+  done
+done
+
+for f in "${ordered[@]:-}"; do
+  [[ -z "$f" ]] && continue
+  info="$(brew info --json=v2 "$f")"
+  ver="$(jq -r '.formulae[0] | .versions.stable + (if (.revision // 0) > 0 then "_\(.revision)" else "" end)' <<<"$info")"
+  if jq -e '(.formulae[0].bottle.stable.files // {}) | has("tahoe") or has("sequoia") or has("all")' <<<"$info" >/dev/null; then
+    echo "==> $f: upstream Intel bottle"
+    if brew list --versions "$f" >/dev/null 2>&1; then brew upgrade "$f"; else brew install "$f"; fi
+    continue
+  fi
+  tag="$(printf '%s-%s' "$f" "$ver" | tr '@+' '-p')"
+  file="$f--$ver.$BOTTLE_TAG.bottle.tar.gz"
+  url="https://github.com/$REPO/releases/download/$tag/$file"
+  if curl -fsSLI -o /dev/null "$url"; then
+    echo "==> $f $ver: installing bottle from $REPO"
+    curl -fsSL -o "$tmp/$file" "$url"
+    # `brew install <local bottle>` refuses/redirects when an older version is installed,
+    # so remove the old keg first (dependents are left alone) and pour the new one.
+    if brew list --versions "$f" >/dev/null 2>&1; then
+      brew uninstall --ignore-dependencies "$f"
+    fi
+    brew install "$tmp/$file"
+  elif ((allow_source)); then
+    echo "==> $f: no bottle, building from source"
+    if brew list --versions "$f" >/dev/null 2>&1; then brew upgrade --build-from-source "$f"; else brew install --build-from-source "$f"; fi
+  else
+    echo "WARN: $f $ver: no bottle yet, skipping (would compile). Use --allow-source to build." >&2
+  fi
+done
+
+((cask)) && brew upgrade --cask
+exit 0
