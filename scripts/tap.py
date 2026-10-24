@@ -167,6 +167,14 @@ def setup_tap():
     run("brew", "trust", TAP, check=False)  # newer Homebrew requires trusting third-party taps
 
 
+def unlink_openssl(keep):
+    # Preinstalled openssl variants hold /usr/local/bin/openssl links that block linking ours.
+    for f in run("brew", "list", "--formula", "-1", capture=True).split():
+        if f.startswith("openssl") and f != keep:
+            run("brew", "link", "--force", "--overwrite", f, check=False)  # record stale links so unlink removes them
+            run("brew", "unlink", f, check=False)
+
+
 def ensure_installed_deps(name, mirrored):
     """Install all runtime+build deps at the right version before building. Prefer tap bottles
     (nothing recompiles); fall back to core bottles, then source. Stale preinstalled copies are
@@ -182,6 +190,8 @@ def ensure_installed_deps(name, mirrored):
                 continue
             run("brew", "fetch", f"{TAP}/{d}", check=False)  # download before uninstall: brewed curl needs libssh2/openssl
             run("brew", "uninstall", "--ignore-dependencies", "--force", d, check=False)
+            if d.startswith("openssl"):
+                unlink_openssl(d)
             run("brew", "install", f"{TAP}/{d}")
         elif cur and d not in outdated:
             continue
@@ -189,6 +199,8 @@ def ensure_installed_deps(name, mirrored):
             if cur:
                 run("brew", "fetch", d, check=False)
                 run("brew", "uninstall", "--ignore-dependencies", "--force", d, check=False)
+            if d.startswith("openssl"):
+                unlink_openssl(d)
             if run("brew", "install", d, check=False) != 0:
                 run("brew", "install", "--build-from-source", d)
 
@@ -200,11 +212,7 @@ def build(name, mirrored):
     ensure_installed_deps(name, mirrored)
     run("brew", "fetch", "--build-from-source", f"{TAP}/{name}")  # fetch first: uninstalling libssh2/openssl@3 breaks brewed curl
     run("brew", "uninstall", "--ignore-dependencies", "--force", name, check=False)
-    # Preinstalled openssl variants hold /usr/local/bin/openssl links that block linking ours.
-    for f in run("brew", "list", "--formula", "-1", capture=True).split():
-        if f.startswith("openssl") and f != name:
-            run("brew", "link", "--force", "--overwrite", f, check=False)  # record stale links so unlink removes them
-            run("brew", "unlink", f, check=False)
+    unlink_openssl(name)
     run("brew", "install", "--build-bottle", f"{TAP}/{name}")
     work = ROOT / "bottles" / name
     shutil.rmtree(work, ignore_errors=True)
