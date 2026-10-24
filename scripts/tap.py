@@ -83,7 +83,7 @@ DEP_RE = re.compile(r'^(\s*depends_on\s+)"([^"/]+)"(.*)$', re.M)
 
 
 def normalize(text):
-    text = re.sub(r'^(\s*depends_on\s+")' + re.escape(TAP) + r'/([^"\n]+".*:build.*)$', r"\1\2", text, flags=re.M)
+    text = re.sub(r'^(\s*depends_on\s+")' + re.escape(TAP) + r'/([^"\n]+".*:(?:build|test).*)$', r"\1\2", text, flags=re.M)
     return re.sub(r"\n{3,}", "\n\n", BOTTLE_RE.sub("", text))
 
 
@@ -93,7 +93,7 @@ NOAUTOBUMP_RE = re.compile(r"^[ \t]*no_autobump!(?:.*,[ \t]*\n[ \t]+)*.*\n", re.
 def prefix_deps(text, mirrored):
     def sub(m):
         name, rest = m.group(2), m.group(3)
-        if name in mirrored and not (":test" in rest and ":build" not in rest):
+        if name in mirrored:
             return f'{m.group(1)}"{TAP}/{name}"{rest}'
         return m.group(0)
 
@@ -212,7 +212,14 @@ def build(name, mirrored):
     ensure_installed_deps(name, mirrored)
     run("brew", "fetch", "--build-from-source", f"{TAP}/{name}")  # fetch first: uninstalling libssh2/openssl@3 breaks brewed curl
     run("brew", "uninstall", "--ignore-dependencies", "--force", name, check=False)
-    unlink_openssl(name)
+    if name.startswith("openssl"):
+        unlink_openssl(name)
+    else:  # keep openssl deps linked: non-keg-only deps are found via /usr/local links
+        for dep in run("brew", "deps", "--include-build", f"{TAP}/{name}", capture=True).split():
+            d = dep.rsplit("/", 1)[-1]
+            if d.startswith("openssl"):
+                unlink_openssl(d)
+                run("brew", "link", "--overwrite", d, check=False)
     run("brew", "install", "--build-bottle", f"{TAP}/{name}")
     work = ROOT / "bottles" / name
     shutil.rmtree(work, ignore_errors=True)
