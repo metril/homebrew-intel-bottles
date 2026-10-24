@@ -220,7 +220,11 @@ def build(name, mirrored):
             if d.startswith("openssl"):
                 unlink_openssl(d)
                 run("brew", "link", "--overwrite", d, check=False)
-    run("brew", "install", "--build-bottle", f"{TAP}/{name}")
+    if run("brew", "install", "--build-bottle", f"{TAP}/{name}", check=False):
+        # keg may be built with only the final link step failing on non-brew files
+        if not run("brew", "list", "--versions", name, check=False, capture=True):
+            sys.exit(f"brew install failed for {name}")
+        run("brew", "link", "--overwrite", name)
     work = ROOT / "bottles" / name
     shutil.rmtree(work, ignore_errors=True)
     work.mkdir(parents=True)
