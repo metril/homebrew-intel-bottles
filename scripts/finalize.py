@@ -11,12 +11,14 @@ brew_update()
 FORMULA_DIR.mkdir(exist_ok=True)
 for j in jsons:
     shutil.copy(ROOT / "cand" / f"{j.stem}.rb", FORMULA_DIR / f"{j.stem}.rb")
+if (ROOT / "cand/Patches").exists():
+    shutil.copytree(ROOT / "cand/Patches", ROOT / "Patches", dirs_exist_ok=True)
 setup_tap()
 for j in jsons:
     run("brew", "bottle", "--merge", "--write", "--no-commit", str(j))
 run("git", "config", "user.name", "metril", cwd=ROOT)
 run("git", "config", "user.email", "1517921+metril@users.noreply.github.com", cwd=ROOT)
-run("git", "add", "Formula", cwd=ROOT)
+run("git", "add", "Formula", *(["Patches"] if (ROOT / "Patches").exists() else []), cwd=ROOT)
 run("git", "commit", "-q", "-m", "Add bottles: " + ", ".join(j.stem for j in jsons), cwd=ROOT)
 for attempt in range(5):
     run("git", "pull", "-q", "--rebase", "origin", "main", cwd=ROOT)

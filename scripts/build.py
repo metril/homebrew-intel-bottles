@@ -8,5 +8,7 @@ brew_update()
 mirrored = {p.stem for p in FORMULA_DIR.glob("*.rb")} | {p.stem for p in (ROOT / "cand").glob("*.rb")}
 FORMULA_DIR.mkdir(exist_ok=True)
 shutil.copy(ROOT / "cand" / f"{name}.rb", FORMULA_DIR / f"{name}.rb")
+if (ROOT / "cand/Patches").exists():
+    shutil.copytree(ROOT / "cand/Patches", ROOT / "Patches", dirs_exist_ok=True)
 setup_tap()
 build(name, mirrored)

@@ -22,6 +22,7 @@ for name in order:
         new = old  # same source, just missing a bottle
     needs[name] = new
     (cand / f"{name}.rb").write_text(new)
+    fetch_patches(new, cand)
 
 ready, remaining = [], []
 for name in needs:

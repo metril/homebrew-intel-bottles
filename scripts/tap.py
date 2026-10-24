@@ -83,6 +83,7 @@ DEP_RE = re.compile(r'^(\s*depends_on\s+)"([^"/]+)"(.*)$', re.M)
 
 
 def normalize(text):
+    text = re.sub(r'^(\s*depends_on\s+")' + re.escape(TAP) + r'/([^"\n]+".*:build.*)$', r"\1\2", text, flags=re.M)
     return re.sub(r"\n{3,}", "\n\n", BOTTLE_RE.sub("", text))
 
 
@@ -94,7 +95,7 @@ def rewrite(text, mirrored):
 
     def sub(m):
         name, rest = m.group(2), m.group(3)
-        if name in mirrored and ":build" not in rest and ":test" not in rest:
+        if name in mirrored and ":test" not in rest:
             return f'{m.group(1)}"{TAP}/{name}"{rest}'
         return m.group(0)
 
@@ -106,6 +107,15 @@ def fetch_source(info):
     url = f"https://raw.githubusercontent.com/Homebrew/homebrew-core/HEAD/{path}"
     with urllib.request.urlopen(url) as r:
         return r.read().decode()
+
+
+def fetch_patches(text, base):
+    """Download the `file "Patches/..."` patches a formula references into base/, same relative path."""
+    for p in set(re.findall(r'file\s+"(Patches/[^"]+)"', text)):
+        dest = Path(base) / p
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        with urllib.request.urlopen(f"https://raw.githubusercontent.com/Homebrew/homebrew-core/HEAD/{p}") as r:
+            dest.write_bytes(r.read())
 
 
 def has_bottle(text):
@@ -175,6 +185,7 @@ def build(name, mirrored):
     # Preinstalled openssl variants hold /usr/local/bin/openssl links that block linking ours.
     for f in run("brew", "list", "--formula", "-1", capture=True).split():
         if f.startswith("openssl") and f != name:
+            run("brew", "link", "--force", "--overwrite", f, check=False)  # record stale links so unlink removes them
             run("brew", "unlink", f, check=False)
     run("brew", "install", "--build-bottle", f"{TAP}/{name}")
     work = ROOT / "bottles" / name
