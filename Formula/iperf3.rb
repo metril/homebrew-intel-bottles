@@ -18,9 +18,9 @@ class Iperf3 < Formula
   head do
     url "https://github.com/esnet/iperf.git", branch: "master"
 
-    depends_on "autoconf" => :build
-    depends_on "automake" => :build
-    depends_on "libtool" => :build
+    depends_on "metril/intel-bottles/autoconf" => :build
+    depends_on "metril/intel-bottles/automake" => :build
+    depends_on "metril/intel-bottles/libtool" => :build
   end
 
   depends_on "metril/intel-bottles/openssl@4"

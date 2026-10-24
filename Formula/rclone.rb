@@ -12,7 +12,7 @@ class Rclone < Formula
     sha256 cellar: :any_skip_relocation, sequoia: "bb67baaf11893ebf94afb3742bab1c8064882acbe50841c2a372949617a7f686"
   end
 
-  depends_on "go" => :build
+  depends_on "metril/intel-bottles/go" => :build
 
   deny_network_access!
 

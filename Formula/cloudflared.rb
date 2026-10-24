@@ -11,7 +11,7 @@ class Cloudflared < Formula
     sha256 cellar: :any_skip_relocation, sequoia: "f23f03feaea2b9c7e3c3b69b600e5af9be207aed4f2d2bdb854887c24a4052d8"
   end
 
-  depends_on "go" => :build
+  depends_on "metril/intel-bottles/go" => :build
 
   deny_network_access!
 

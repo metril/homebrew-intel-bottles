@@ -19,9 +19,9 @@ class Gmp < Formula
     sha256 cellar: :any, sequoia: "e7003180761ba5e9c94fe43e20add8a3f4d74eeaa36017610a68fc9b9af6dd3b"
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
+  depends_on "metril/intel-bottles/autoconf" => :build
+  depends_on "metril/intel-bottles/automake" => :build
+  depends_on "metril/intel-bottles/libtool" => :build
 
   uses_from_macos "m4" => :build
 

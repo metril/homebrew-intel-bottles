@@ -11,7 +11,7 @@ class Restic < Formula
     sha256 cellar: :any_skip_relocation, sequoia: "865b53e8054182ee2f93ba743356a4b7e5e5d91eb6e158879e7739eb42f41921"
   end
 
-  depends_on "go" => :build
+  depends_on "metril/intel-bottles/go" => :build
 
   deny_network_access!
 

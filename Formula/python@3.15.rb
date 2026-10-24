@@ -1,10 +1,9 @@
 class PythonAT315 < Formula
   desc "Interpreted, interactive, object-oriented programming language"
   homepage "https://www.python.org/"
-  url "https://www.python.org/ftp/python/3.15.0/Python-3.15.0.tgz"
-  sha256 "438596cac081036d3c1d532ab7e7335eeb35567bc961749a0d5797176db0db68"
+  url "https://www.python.org/ftp/python/3.15.1/Python-3.15.1.tgz"
+  sha256 "133d85e118dc32621cda1d9d1d7d9694fe0c5e82bc339a7d528c109fe8b36387"
   license "Python-2.0"
-  revision 1
 
   livecheck do
     url "https://www.python.org/downloads/source/"
@@ -12,8 +11,8 @@ class PythonAT315 < Formula
   end
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/python-3.15-3.15.0_1"
-    sha256 sequoia: "0f06d044c4a6dfb88422d36b1efb8d9f00aeb2da98284f75c5d51e97e53064cc"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/python-3.15-3.15.1"
+    sha256 sequoia: "818f96a914c75cdb85752283d2622fbc5321b41398fd709794d64a722cdf56e3"
   end
 
   # https://devguide.python.org/versions/#versions

@@ -18,7 +18,7 @@ class Lz4 < Formula
     sha256 cellar: :any, sequoia: "ac2aa30e8b0e5495c9c9654a4e54c971a398f8c074b34d483135e1c7f441b3e1"
   end
 
-  depends_on "cmake" => :build
+  depends_on "metril/intel-bottles/cmake" => :build
 
   deny_network_access!
 

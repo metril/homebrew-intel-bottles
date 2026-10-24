@@ -26,7 +26,7 @@ class Zstd < Formula
     sha256 cellar: :any, sequoia: "40d8120cb36f5338975b7d2ea9a31452aec1df53e2be831d84e4eb12b1153523"
   end
 
-  depends_on "cmake" => :build
+  depends_on "metril/intel-bottles/cmake" => :build
   depends_on "metril/intel-bottles/lz4"
   depends_on "metril/intel-bottles/xz"
 

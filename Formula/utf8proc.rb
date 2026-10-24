@@ -12,7 +12,7 @@ class Utf8proc < Formula
     sha256 cellar: :any, sequoia: "e8ad2be11eb0ac26a15dd945e2aa5c28542f0af0978fe90c2279edd1992e9b27"
   end
 
-  depends_on "cmake" => :build
+  depends_on "metril/intel-bottles/cmake" => :build
 
   deny_network_access!
 

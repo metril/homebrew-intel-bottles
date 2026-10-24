@@ -10,7 +10,7 @@ class PythonSetuptools < Formula
     sha256 cellar: :any_skip_relocation, sequoia: "32dd52b02c4394c218237bf7cc03448f2eb8a9eeb2d059824ca30acbec91a26e"
   end
 
-  depends_on "python@3.15" => [:build, :test]
+  depends_on "metril/intel-bottles/python@3.15" => [:build, :test]
 
   deny_network_access!
 

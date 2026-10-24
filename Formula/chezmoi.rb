@@ -18,7 +18,7 @@ class Chezmoi < Formula
     sha256 cellar: :any_skip_relocation, sequoia: "645cb2c15733d920fd68aa41d78838a7002983d2adf6fad4e43c199f68bbf3ca"
   end
 
-  depends_on "go" => :build
+  depends_on "metril/intel-bottles/go" => :build
 
   deny_network_access!
 

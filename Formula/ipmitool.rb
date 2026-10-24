@@ -17,9 +17,9 @@ class Ipmitool < Formula
     sha256 sequoia: "a18a7481736ea480865d7a0f2fd4a1f4220223c5417723d09d3b1626b949cdd9"
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
+  depends_on "metril/intel-bottles/autoconf" => :build
+  depends_on "metril/intel-bottles/automake" => :build
+  depends_on "metril/intel-bottles/libtool" => :build
   depends_on "metril/intel-bottles/openssl@4"
 
   on_linux do

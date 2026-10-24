@@ -15,9 +15,9 @@ class Oniguruma < Formula
     sha256 cellar: :any, sequoia: "d57050ee95d3c4149107261b8d8de2a9aa8d90b6473c1974191e50ee6f4f3396"
   end
 
-  depends_on "autoconf" => :build
-  depends_on "automake" => :build
-  depends_on "libtool" => :build
+  depends_on "metril/intel-bottles/autoconf" => :build
+  depends_on "metril/intel-bottles/automake" => :build
+  depends_on "metril/intel-bottles/libtool" => :build
 
   def install
     system "autoreconf", "--force", "--install", "--verbose"
