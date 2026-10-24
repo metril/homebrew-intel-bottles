@@ -13,6 +13,8 @@ for j in jsons:
     shutil.copy(ROOT / "cand" / f"{j.stem}.rb", FORMULA_DIR / f"{j.stem}.rb")
 if (ROOT / "cand/Patches").exists():
     shutil.copytree(ROOT / "cand/Patches", ROOT / "Patches", dirs_exist_ok=True)
+mirrored = {p.stem for p in FORMULA_DIR.glob("*.rb")} | {p.stem for p in (ROOT / "cand").glob("*.rb")}
+fix_formulae(mirrored)
 setup_tap()
 for j in jsons:
     run("brew", "bottle", "--merge", "--write", "--no-commit", str(j))

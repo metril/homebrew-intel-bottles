@@ -10,5 +10,6 @@ FORMULA_DIR.mkdir(exist_ok=True)
 shutil.copy(ROOT / "cand" / f"{name}.rb", FORMULA_DIR / f"{name}.rb")
 if (ROOT / "cand/Patches").exists():
     shutil.copytree(ROOT / "cand/Patches", ROOT / "Patches", dirs_exist_ok=True)
+fix_formulae(mirrored)
 setup_tap()
 build(name, mirrored)

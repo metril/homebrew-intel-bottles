@@ -90,16 +90,27 @@ def normalize(text):
 NOAUTOBUMP_RE = re.compile(r"^[ \t]*no_autobump!(?:.*,[ \t]*\n[ \t]+)*.*\n", re.M)  # official-tap-only DSL
 
 
-def rewrite(text, mirrored):
-    text = NOAUTOBUMP_RE.sub("", BOTTLE_RE.sub("", text))
-
+def prefix_deps(text, mirrored):
     def sub(m):
         name, rest = m.group(2), m.group(3)
-        if name in mirrored and ":test" not in rest:
+        if name in mirrored and not (":test" in rest and ":build" not in rest):
             return f'{m.group(1)}"{TAP}/{name}"{rest}'
         return m.group(0)
 
-    text = DEP_RE.sub(sub, text)
+    return DEP_RE.sub(sub, text)
+
+
+def fix_formulae(mirrored):
+    for f in FORMULA_DIR.glob("*.rb"):
+        t = f.read_text()
+        n = prefix_deps(t, mirrored)
+        if n != t:
+            f.write_text(n)
+
+
+def rewrite(text, mirrored):
+    text = NOAUTOBUMP_RE.sub("", BOTTLE_RE.sub("", text))
+    text = prefix_deps(text, mirrored)
     # tap deps are named "metril/intel-bottles/x"; keep name inspection in formula code working
     text = text.replace("deps.map(&:name)", 'deps.map { |d| d.name.split("/").last }')
     text = re.sub(r"\bdep\.name\.(?=(?:start_with|match)\?)", 'dep.name.split("/").last.', text)
