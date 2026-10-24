@@ -99,7 +99,11 @@ def rewrite(text, mirrored):
             return f'{m.group(1)}"{TAP}/{name}"{rest}'
         return m.group(0)
 
-    return re.sub(r"\n{3,}", "\n\n", DEP_RE.sub(sub, text))
+    text = DEP_RE.sub(sub, text)
+    # tap deps are named "metril/intel-bottles/x"; keep name inspection in formula code working
+    text = text.replace("deps.map(&:name)", 'deps.map { |d| d.name.split("/").last }')
+    text = re.sub(r"\bdep\.name\.(?=(?:start_with|match)\?)", 'dep.name.split("/").last.', text)
+    return re.sub(r"\n{3,}", "\n\n", text)
 
 
 def fetch_source(info):
@@ -165,12 +169,14 @@ def ensure_installed_deps(name, mirrored):
         if d in mirrored and tapf.exists() and has_bottle(tapf.read_text()):
             if tap_version(d) in cur:
                 continue
+            run("brew", "fetch", f"{TAP}/{d}", check=False)  # download before uninstall: brewed curl needs libssh2/openssl
             run("brew", "uninstall", "--ignore-dependencies", "--force", d, check=False)
             run("brew", "install", f"{TAP}/{d}")
         elif cur and d not in outdated:
             continue
         else:
             if cur:
+                run("brew", "fetch", d, check=False)
                 run("brew", "uninstall", "--ignore-dependencies", "--force", d, check=False)
             if run("brew", "install", d, check=False) != 0:
                 run("brew", "install", "--build-from-source", d)
@@ -181,6 +187,7 @@ def build(name, mirrored):
     ver = tap_version(name)
     tag = release_tag(name, ver)
     ensure_installed_deps(name, mirrored)
+    run("brew", "fetch", "--build-from-source", f"{TAP}/{name}")  # fetch first: uninstalling libssh2/openssl@3 breaks brewed curl
     run("brew", "uninstall", "--ignore-dependencies", "--force", name, check=False)
     # Preinstalled openssl variants hold /usr/local/bin/openssl links that block linking ours.
     for f in run("brew", "list", "--formula", "-1", capture=True).split():
