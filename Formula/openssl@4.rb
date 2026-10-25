@@ -1,9 +1,9 @@
 class OpensslAT4 < Formula
   desc "Cryptography and SSL/TLS Toolkit"
   homepage "https://openssl-library.org"
-  url "https://github.com/openssl/openssl/releases/download/openssl-4.0.3/openssl-4.0.3.tar.gz"
-  mirror "http://fresh-center.net/linux/misc/openssl-4.0.3.tar.gz"
-  sha256 "325b5c806167c13b40b1ffeadfe0248197c00eccc4cf123ec1e28d2d2fd216d9"
+  url "https://github.com/openssl/openssl/releases/download/openssl-4.1.0/openssl-4.1.0.tar.gz"
+  mirror "http://fresh-center.net/linux/misc/openssl-4.1.0.tar.gz"
+  sha256 "50c17baf54cb008f6ce42d50deb4b28050a1aad711636cabd4b241c7e90cc2fd"
   license "Apache-2.0"
 
   livecheck do
@@ -12,8 +12,8 @@ class OpensslAT4 < Formula
   end
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/openssl-4-4.0.3"
-    sha256 sequoia: "4052ac7912296b121bb119a94c90e7b0501dc572c1627e25c0228217e6b22d32"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/openssl-4-4.1.0"
+    sha256 sequoia: "5de32a14be874874864d12b0d2282bfe8273416d8515fdb6326488ad3602d0a4"
   end
 
   depends_on "metril/intel-bottles/ca-certificates" => :no_linkage
