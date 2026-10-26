@@ -114,6 +114,8 @@ def rewrite(text, mirrored):
     # tap deps are named "metril/intel-bottles/x"; keep name inspection in formula code working
     text = text.replace("deps.map(&:name)", 'deps.map { |d| d.name.split("/").last }')
     text = re.sub(r"\bdep\.name\.(?=(?:start_with|match)\?)", 'dep.name.split("/").last.', text)
+    # llvm's 3-stage PGO bootstrap exceeds the 6h job limit on Intel runners; build it once
+    text = re.sub(r"^(\s*pgo_build = ).*$", r"\1false", text, flags=re.M)
     return re.sub(r"\n{3,}", "\n\n", text)
 
 
@@ -149,6 +151,10 @@ def release_tag(name, ver):
 
 
 def brew_update():
+    # Third-party taps preinstalled on the runner image can break `brew update` (e.g. a renamed branch)
+    for t in run("brew", "tap", capture=True).split():
+        if not t.startswith("homebrew/") and t != TAP:
+            run("brew", "untap", "--force", t, check=False)
     run("brew", "update")
     os.environ["HOMEBREW_NO_AUTO_UPDATE"] = "1"  # already updated; keep the run stable
     os.environ["HOMEBREW_NO_INSTALL_CLEANUP"] = "1"
