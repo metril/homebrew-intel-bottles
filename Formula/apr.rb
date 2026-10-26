@@ -9,7 +9,7 @@ class Apr < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/apr-1.7.6"
-    sha256 cellar: :any, sequoia: "3f30e15298c53944b6d489e57f884adc943cd603cf0c11e275c70d8ed845970e"
+    sha256 cellar: :any, sequoia: "887590cbb978cbd3563929540e9f97991a87555e512664f14fe4b457a5910094"
   end
 
   keg_only :provided_by_macos, "Apple's CLT provides apr"
@@ -19,6 +19,8 @@ class Apr < Formula
   on_linux do
     depends_on "util-linux"
   end
+
+  deny_network_access!
 
   def install
     # https://bz.apache.org/bugzilla/show_bug.cgi?id=57359
