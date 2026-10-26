@@ -9,7 +9,7 @@ class AprUtil < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/apr-util-1.6.5_1"
-    sha256 sequoia: "cc518affeece2038e7a4a3c8d6cea0219b147e36713e00b8f87faae8f382a804"
+    sha256 sequoia: "65c16e1c840bc29dcd8b822236a64803c77b73347c818e2a37ea65f796065af0"
   end
 
   keg_only :shadowed_by_macos, "Apple's CLT provides apr (but not apr-util)"
@@ -24,6 +24,8 @@ class AprUtil < Formula
   on_linux do
     depends_on "unixodbc"
   end
+
+  deny_network_access!
 
   def install
     system "./configure", "--with-apr=#{formula_opt_prefix("apr")}",
