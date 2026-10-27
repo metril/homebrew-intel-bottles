@@ -28,7 +28,7 @@ class ApacheSerf < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/apache-serf-1.3.10_1"
-    sha256 cellar: :any, sequoia: "b63b0a62fd4d5c6985e5a91e3ad7430c14d2b14eccc534b5be56851f4b7c0656"
+    sha256 cellar: :any, sequoia: "72ed47448ddbeb27851f11507f489d31cb573feac4c2929274d86d22aabe34d1"
   end
 
   depends_on "metril/intel-bottles/scons" => :build
@@ -100,7 +100,6 @@ class ApacheSerf < Formula
       }
     C
 
-    ENV.prepend_path "PKG_CONFIG_PATH", formula_opt_lib(openssl)/"pkgconfig"
     if OS.mac?
       ENV.prepend_path "PKG_CONFIG_PATH", formula_opt_lib("apr")/"pkgconfig"
       ENV.prepend_path "PKG_CONFIG_PATH", formula_opt_lib("apr-util")/"pkgconfig"
