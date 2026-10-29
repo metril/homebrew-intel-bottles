@@ -57,6 +57,11 @@ jobs:
         with:
           name: bottle-${{ matrix.safe }}
           path: out/*.json
+      - if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs-${{ matrix.safe }}
+          path: ~/Library/Logs/Homebrew/
 
   finalize:
     needs: [plan, build]
