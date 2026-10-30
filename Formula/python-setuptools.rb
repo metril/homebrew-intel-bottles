@@ -4,10 +4,11 @@ class PythonSetuptools < Formula
   url "https://files.pythonhosted.org/packages/70/b3/c19426f783614d625699a4b247faf628ea9ab1db228674491767b417f9e1/setuptools-84.2.1.tar.gz"
   sha256 "3ff8b3b5492a0aa66960f4419365a86b84e013070d4313e4d4a6894f5d64d6bc"
   license "MIT"
+  compatibility_version 1
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/python-setuptools-84.2.1"
-    sha256 cellar: :any_skip_relocation, sequoia: "32dd52b02c4394c218237bf7cc03448f2eb8a9eeb2d059824ca30acbec91a26e"
+    sha256 cellar: :any_skip_relocation, sequoia: "261f1e68b54ef30aa7ec8dc9cb6f2ba403a054b7c0e4f2944f224edd6929b271"
   end
 
   depends_on "metril/intel-bottles/python@3.15" => [:build, :test]

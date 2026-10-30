@@ -3,6 +3,7 @@ class ApacheSerf < Formula
   homepage "https://serf.apache.org/"
   license "Apache-2.0"
   revision 1
+  compatibility_version 1
   head "https://github.com/apache/serf.git", branch: "trunk"
 
   stable do
@@ -28,7 +29,7 @@ class ApacheSerf < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/apache-serf-1.3.10_1"
-    sha256 cellar: :any, sequoia: "72ed47448ddbeb27851f11507f489d31cb573feac4c2929274d86d22aabe34d1"
+    sha256 cellar: :any, sequoia: "86ff2d2dd43669e087e2cfdeb4daaa39f9a40652d6d40f37c0100ed9dc778089"
   end
 
   depends_on "metril/intel-bottles/scons" => :build
