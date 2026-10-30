@@ -6,11 +6,12 @@ class SphinxDoc < Formula
   url "https://files.pythonhosted.org/packages/64/d4/413466f0be8b1cb0e3e43893a148b96d7462d0923d82b4166b21afc5f30c/sphinx-9.2.0.tar.gz"
   sha256 "90470459f3cab15d9dfed146c71cf77694b0445df17b2e0e69059cb9f7fc9ee4"
   license "BSD-2-Clause"
+  compatibility_version 1
   head "https://github.com/sphinx-doc/sphinx.git", branch: "master"
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/sphinx-doc-9.2.0"
-    sha256 cellar: :any_skip_relocation, sequoia: "e8edc40dcfb82704e3875da29e58009bd1b5debc92094f8981e42a02c4343f3f"
+    sha256 cellar: :any_skip_relocation, sequoia: "4980767f594d36b8469e9a08637521ec0de390bbe46e616a7702eb1a55ffeb45"
   end
 
   depends_on "metril/intel-bottles/certifi"

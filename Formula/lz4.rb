@@ -6,6 +6,7 @@ class Lz4 < Formula
   mirror "http://fresh-center.net/linux/misc/legacy/lz4-1.10.0.tar.gz"
   sha256 "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b"
   license "BSD-2-Clause"
+  compatibility_version 1
   head "https://github.com/lz4/lz4.git", branch: "dev"
 
   livecheck do
@@ -15,7 +16,7 @@ class Lz4 < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/lz4-1.10.0"
-    sha256 cellar: :any, sequoia: "ac2aa30e8b0e5495c9c9654a4e54c971a398f8c074b34d483135e1c7f441b3e1"
+    sha256 cellar: :any, sequoia: "40c8297a240a25bc654b74a43c44072611d370b16cc1af6da48be2f3d25311b2"
   end
 
   depends_on "metril/intel-bottles/cmake" => :build

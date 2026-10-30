@@ -4,6 +4,7 @@ class Oniguruma < Formula
   url "https://github.com/kkos/oniguruma/releases/download/v6.9.10/onig-6.9.10.tar.gz"
   sha256 "2a5cfc5ae259e4e97f86b68dfffc152cdaffe94e2060b770cb827238d769fc05"
   license "BSD-2-Clause"
+  compatibility_version 1
   head "https://github.com/kkos/oniguruma.git", branch: "master"
 
   livecheck do
@@ -12,7 +13,7 @@ class Oniguruma < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/oniguruma-6.9.10"
-    sha256 cellar: :any, sequoia: "d57050ee95d3c4149107261b8d8de2a9aa8d90b6473c1974191e50ee6f4f3396"
+    sha256 cellar: :any, sequoia: "11cadbe69abcdde42e4e5dbf830e24d24c0c276c06e3dd38e7b64ae81d4de444"
   end
 
   depends_on "metril/intel-bottles/autoconf" => :build

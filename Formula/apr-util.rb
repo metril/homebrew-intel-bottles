@@ -6,10 +6,11 @@ class AprUtil < Formula
   sha256 "96de1dd6f6a0476d2d2e7964926d8c1ddc3bb0e210e1b1812d3ba5a454a392e2"
   license "Apache-2.0"
   revision 1
+  compatibility_version 1
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/apr-util-1.6.5_1"
-    sha256 sequoia: "65c16e1c840bc29dcd8b822236a64803c77b73347c818e2a37ea65f796065af0"
+    sha256 sequoia: "f5ba7732ffe4f3defcb4559b734de9bdafce0a71b3dd6422a5ce152c6a13f9a9"
   end
 
   keg_only :shadowed_by_macos, "Apple's CLT provides apr (but not apr-util)"

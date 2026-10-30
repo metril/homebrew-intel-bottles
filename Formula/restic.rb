@@ -4,11 +4,12 @@ class Restic < Formula
   url "https://github.com/restic/restic/archive/refs/tags/v0.19.1.tar.gz"
   sha256 "bb9b1a19040744d26d8a79be029d4e6b189c45ccc9d8831d7fe367d3c33df725"
   license "BSD-2-Clause"
+  compatibility_version 1
   head "https://github.com/restic/restic.git", branch: "master"
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/restic-0.19.1"
-    sha256 cellar: :any_skip_relocation, sequoia: "865b53e8054182ee2f93ba743356a4b7e5e5d91eb6e158879e7739eb42f41921"
+    sha256 cellar: :any_skip_relocation, sequoia: "8d4b1c0a09221c260f1f93e94ea395b74fb26bf6ee5e057fb4fd7c2076dd38dc"
   end
 
   depends_on "metril/intel-bottles/go" => :build

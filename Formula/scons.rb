@@ -6,10 +6,11 @@ class Scons < Formula
   url "https://files.pythonhosted.org/packages/42/b9/b7a5c88f348a0c34594d88100872c55fa1cae863ccb222c1c438341b5503/scons-4.11.1.tar.gz"
   sha256 "4210d1a80a62e986029208117991b6347ccaaaab37b67463a3ff31ee065dc487"
   license "MIT"
+  compatibility_version 1
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/scons-4.11.1"
-    sha256 cellar: :any_skip_relocation, sequoia: "558f13f5b917cffa80d75d9f34bf1e65a12b8cc607387e4837a9d9bdb8b73104"
+    sha256 cellar: :any_skip_relocation, sequoia: "70acb755949bd161e2219a97f286d189c09fa4c56e321561af8a0004bde896cd"
   end
 
   depends_on "metril/intel-bottles/python@3.15"
