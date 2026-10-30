@@ -5,6 +5,7 @@ class OpensslAT4 < Formula
   mirror "http://fresh-center.net/linux/misc/openssl-4.1.0.tar.gz"
   sha256 "50c17baf54cb008f6ce42d50deb4b28050a1aad711636cabd4b241c7e90cc2fd"
   license "Apache-2.0"
+  compatibility_version 1
 
   livecheck do
     url "https://openssl-library.org/source/"
@@ -13,7 +14,7 @@ class OpensslAT4 < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/openssl-4-4.1.0"
-    sha256 sequoia: "5de32a14be874874864d12b0d2282bfe8273416d8515fdb6326488ad3602d0a4"
+    sha256 sequoia: "9d63a8eda64b9145b04db55b305bf2c806b892fcb468bc9519dc24dc3f41c7fc"
   end
 
   depends_on "metril/intel-bottles/ca-certificates" => :no_linkage
