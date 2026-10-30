@@ -4,6 +4,7 @@ class PythonAT315 < Formula
   url "https://www.python.org/ftp/python/3.15.2/Python-3.15.2.tgz"
   sha256 "f74e1db0eabd651cd01e4e2a00201bd41866abe74869ab716f9bf33cbbaa0943"
   license "Python-2.0"
+  compatibility_version 1
 
   livecheck do
     url "https://www.python.org/downloads/source/"
@@ -12,7 +13,7 @@ class PythonAT315 < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/python-3.15-3.15.2"
-    sha256 sequoia: "6c9a4d3047a54b5bdb321e9420c36e255e9cebd12b7523c8dde314fe633180f1"
+    sha256 sequoia: "d35da0382238ff51f9c488f7bd594c2d8e5041a0dd884b7b1e2604f400dcf073"
   end
 
   # https://devguide.python.org/versions/#versions
