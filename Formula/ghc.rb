@@ -4,6 +4,7 @@ class Ghc < Formula
   url "https://downloads.haskell.org/~ghc/9.14.1/ghc-9.14.1-src.tar.xz"
   sha256 "2a83779c9af86554a3289f2787a38d6aa83d00d136aa9f920361dd693c101e77"
   license "BSD-3-Clause"
+  compatibility_version 1
   head "https://gitlab.haskell.org/ghc/ghc.git", branch: "master"
 
   livecheck do
@@ -16,7 +17,7 @@ class Ghc < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/ghc-9.14.1"
-    sha256 cellar: :any, sequoia: "f60d4d1e46c98e32cd3b877d45d2a77870262c94cdca7bcce866a208df560cc4"
+    sha256 cellar: :any, sequoia: "441deb8b4e10bb63a3f96cfba50b883e2f814831f292e2abacec21c62b5f2b4a"
   end
 
   depends_on "metril/intel-bottles/autoconf" => :build

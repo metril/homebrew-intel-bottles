@@ -5,10 +5,11 @@ class Subversion < Formula
   mirror "https://archive.apache.org/dist/subversion/subversion-1.15.0.tar.bz2"
   sha256 "dfb7b1e5270c7def971ccbd5938b0c03b1b5bd60b6674a2d8a74a9560839fb8c"
   license "Apache-2.0"
+  compatibility_version 1
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/subversion-1.15.0"
-    sha256 sequoia: "3871c11e39933b5cafda18fb29a9a9a14635b3e42c985f8e1a0b8b4b4228ffd4"
+    sha256 sequoia: "015086f88a4eaa8aee9838d16a5b94c2e54b4b7c5b7c1c60047c3ed08f33263f"
   end
 
   head do
