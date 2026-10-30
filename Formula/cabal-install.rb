@@ -4,11 +4,12 @@ class CabalInstall < Formula
   url "https://hackage.haskell.org/package/cabal-install-3.18.2.0/cabal-install-3.18.2.0.tar.gz"
   sha256 "1d55fea99bf82b2f4a2ae51bd47313167048ba05aac6290a30752d91cd5f7cb8"
   license "BSD-3-Clause"
+  compatibility_version 1
   head "https://github.com/haskell/cabal.git", branch: "master"
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/cabal-install-3.18.2.0"
-    sha256 cellar: :any, sequoia: "46bfc12b9c091bc19ae4e5b6ae8223f4b5fcdec5ac1a890f7d4f96b957aedbfd"
+    sha256 cellar: :any, sequoia: "b8131d8bdf6170050fd2dbca693ee383f0ee77bf81d24268a757c085cd3fbd64"
   end
 
   depends_on "metril/intel-bottles/ghc" => [:build, :test]
