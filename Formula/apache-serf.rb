@@ -29,7 +29,7 @@ class ApacheSerf < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/apache-serf-1.3.10_1"
-    sha256 cellar: :any, sequoia: "86ff2d2dd43669e087e2cfdeb4daaa39f9a40652d6d40f37c0100ed9dc778089"
+    sha256 cellar: :any, sequoia: "186502d823ea306168a382e78e7bb168a6fefc9763d8e54a18ae43f5c26c4cde"
   end
 
   depends_on "metril/intel-bottles/scons" => :build
@@ -43,6 +43,8 @@ class ApacheSerf < Formula
   on_linux do
     depends_on "zlib-ng-compat"
   end
+
+  deny_network_access!
 
   def openssl = "openssl@4"
 

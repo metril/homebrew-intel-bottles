@@ -13,7 +13,7 @@ class PythonAT315 < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/python-3.15-3.15.2"
-    sha256 sequoia: "d35da0382238ff51f9c488f7bd594c2d8e5041a0dd884b7b1e2604f400dcf073"
+    sha256 sequoia: "d1a2806021c2002c2c700fbeb0f0e9de4b14ae53fefff10d883e580873a59c03"
   end
 
   # https://devguide.python.org/versions/#versions
@@ -147,7 +147,8 @@ class PythonAT315 < Formula
       args << "--enable-framework=#{frameworks}"
       args << "--with-dtrace"
       args << "--with-dbmliborder=ndbm"
-      args << "--with-tail-call-interp"
+      # Tail calling needs LLVM 19, which Apple Clang is based on since 17.
+      args << "--with-tail-call-interp" if DevelopmentTools.clang_build_version >= 1700
 
       # Avoid linking to libgcc https://mail.python.org/pipermail/python-dev/2012-February/116205.html
       args << "MACOSX_DEPLOYMENT_TARGET=#{MacOS.version}"
