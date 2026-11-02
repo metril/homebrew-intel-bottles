@@ -10,10 +10,12 @@ class M4 < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/m4-1.4.21"
-    sha256 sequoia: "416b1f0d6a0650edaa17b00741a0a71cd4c1c653a50c61c4d282c3b1b436e170"
+    sha256 sequoia: "889dfb4db0dce5036f3121abbf48faadd64abeec69dafeb89b95b4774bd2195c"
   end
 
   keg_only :provided_by_macos
+
+  deny_network_access!
 
   def install
     system "./configure", "--disable-dependency-tracking", "--prefix=#{prefix}"
