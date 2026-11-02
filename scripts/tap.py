@@ -159,6 +159,7 @@ def brew_update():
     os.environ["HOMEBREW_NO_AUTO_UPDATE"] = "1"  # already updated; keep the run stable
     os.environ["HOMEBREW_NO_INSTALL_CLEANUP"] = "1"
     os.environ["HOMEBREW_NO_INSTALL_UPGRADE"] = "1"  # do not upgrade preinstalled outdated deps (no Intel bottles to pour)
+    os.environ["HOMEBREW_CURL_PATH"] = "/usr/bin/curl"  # brewed curl breaks mid-build (its dylib deps get uninstalled)
 
 
 def setup_tap():
@@ -211,11 +212,29 @@ def ensure_installed_deps(name, mirrored):
                 run("brew", "install", "--build-from-source", d)
 
 
+ALIASES = {"pkg-config": "pkgconf"}  # homebrew-core aliases whose opt/ links Homebrew shims expect
+
+
+def ensure_alias_links():
+    """Create opt/<alias> -> <target> links; the tap-installed target never gets the alias link itself."""
+    opt = Path(run("brew", "--prefix", capture=True)) / "opt"
+    for alias, target in ALIASES.items():
+        link = opt / alias
+        if not (opt / target).exists():
+            continue
+        if link.exists():
+            continue
+        if os.path.lexists(link):  # dangling symlink
+            link.unlink()
+        link.symlink_to(target)
+
+
 def build(name, mirrored):
     """Build and upload one bottle; leaves bottles/<name>/*.json for the finalize job."""
     ver = tap_version(name)
     tag = release_tag(name, ver)
     ensure_installed_deps(name, mirrored)
+    ensure_alias_links()
     run("brew", "fetch", "--build-from-source", f"{TAP}/{name}")  # fetch first: uninstalling libssh2/openssl@3 breaks brewed curl
     run("brew", "uninstall", "--ignore-dependencies", "--force", name, check=False)
     if name.startswith("openssl"):
@@ -226,6 +245,7 @@ def build(name, mirrored):
             if d.startswith("openssl"):
                 unlink_openssl(d)
                 run("brew", "link", "--overwrite", d, check=False)
+    ensure_alias_links()
     if run("brew", "install", "--build-bottle", f"{TAP}/{name}", check=False):
         # keg may be built with only the final link step failing on non-brew files
         if not run("brew", "list", "--versions", name, check=False, capture=True):
@@ -252,7 +272,7 @@ def build(name, mirrored):
     else:
         run("gh", "release", "create", tag, str(upload / asset), "--repo", REPO,
             "--title", f"{name} {ver}", "--notes", f"Intel bottle for {name} {ver} (sequoia).")
-    run("curl", "-fsSLI", "-o", "/dev/null",
+    run("/usr/bin/curl", "-fsSLI", "-o", "/dev/null",
         f"https://github.com/{REPO}/releases/download/{tag}/{t['filename']}")  # must be downloadable
     out = ROOT / "out"
     out.mkdir(exist_ok=True)
