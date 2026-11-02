@@ -10,7 +10,7 @@ class Git < Formula
     "BSD-3-Clause",      # xdiff/xhistogram.c; reftable/
     "MIT",               # khash.h; sha1dc/
   ]
-  revision 1
+  revision 2
   compatibility_version 1
   head "https://github.com/git/git.git", branch: "master"
 
@@ -20,15 +20,16 @@ class Git < Formula
   end
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/git-2.56.0_1"
-    sha256 sequoia: "e537604d4e7d3b23b118c54eb96538a5a1ce4feae8f6def5f84f5dbab012797d"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/git-2.56.0_2"
+    sha256 sequoia: "c81473b84c0614587249f4699378c901795cc19c375577a90f76febbb655919b"
   end
 
   depends_on "metril/intel-bottles/gettext" => :build
   depends_on "metril/intel-bottles/pkgconf" => :build
+  # TODO: Replace with `uses_from_macos` once Apple fixes their CA bundle.
+  depends_on "metril/intel-bottles/curl"
   depends_on "metril/intel-bottles/pcre2"
 
-  uses_from_macos "curl"
   uses_from_macos "expat"
 
   # Don't try to add a libiconv dependency without reading this PR first:
