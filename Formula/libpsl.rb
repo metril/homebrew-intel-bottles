@@ -10,7 +10,7 @@ class Libpsl < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/libpsl-0.23.3"
-    sha256 cellar: :any, sequoia: "72e7c1e3e57ddc9eb280959238f74a9bd5c219a0584c029be5be37adc6604e5c"
+    sha256 cellar: :any, sequoia: "361c34480d378f22e04dbfe0a0bca42454ad656c51850ddec9c6f1b545a4bf3d"
   end
 
   depends_on "metril/intel-bottles/pkgconf" => :build
@@ -19,6 +19,8 @@ class Libpsl < Formula
     depends_on "libidn2"
     depends_on "metril/intel-bottles/libunistring"
   end
+
+  deny_network_access!
 
   def install
     runtime = (OS.linux? || MacOS.version <= :monterey) ? "libidn2" : "libicucore"
