@@ -1,10 +1,10 @@
 class Lz4 < Formula
   desc "Extremely Fast Compression algorithm"
   homepage "https://lz4.github.io/lz4/"
-  url "https://github.com/lz4/lz4/archive/refs/tags/v1.10.0.tar.gz"
-  mirror "http://fresh-center.net/linux/misc/lz4-1.10.0.tar.gz"
-  mirror "http://fresh-center.net/linux/misc/legacy/lz4-1.10.0.tar.gz"
-  sha256 "537512904744b35e232912055ccf8ec66d768639ff3abe5788d90d792ec5f48b"
+  url "https://github.com/lz4/lz4/archive/refs/tags/v1.11.0.tar.gz"
+  mirror "http://fresh-center.net/linux/misc/lz4-1.11.0.tar.gz"
+  mirror "http://fresh-center.net/linux/misc/legacy/lz4-1.11.0.tar.gz"
+  sha256 "247e5fa64da5f7b75ee3dd3bed484076396c9ebe8254d9ccf693eb62800c5e26"
   license "BSD-2-Clause"
   compatibility_version 1
   head "https://github.com/lz4/lz4.git", branch: "dev"
@@ -15,8 +15,8 @@ class Lz4 < Formula
   end
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/lz4-1.10.0"
-    sha256 cellar: :any, sequoia: "40c8297a240a25bc654b74a43c44072611d370b16cc1af6da48be2f3d25311b2"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/lz4-1.11.0"
+    sha256 cellar: :any, sequoia: "506f9521ce70957e275dce38e53e5a7a2bfef920877ccbbf253fa9e25a36a21d"
   end
 
   depends_on "metril/intel-bottles/cmake" => :build

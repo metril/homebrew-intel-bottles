@@ -1,17 +1,16 @@
 class Libngtcp2 < Formula
   desc "IETF QUIC protocol implementation"
   homepage "https://nghttp2.org/ngtcp2/"
-  url "https://github.com/ngtcp2/ngtcp2/releases/download/v1.25.0/ngtcp2-1.25.0.tar.xz"
-  mirror "http://fresh-center.net/linux/www/ngtcp2-1.25.0.tar.xz"
-  sha256 "2a34d2484ba17847a5d11965704e9dd0fac4c6d8efc75ffe1ec7de66d8c6b6fb"
+  url "https://github.com/ngtcp2/ngtcp2/releases/download/v1.26.0/ngtcp2-1.26.0.tar.xz"
+  mirror "http://fresh-center.net/linux/www/ngtcp2-1.26.0.tar.xz"
+  sha256 "7804aa0fa1c39942ba322a90805824c37231f7675b08d0c3cc4332858a7b085e"
   license "MIT"
-  revision 1
   compatibility_version 1
   head "https://github.com/ngtcp2/ngtcp2.git", branch: "main"
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/libngtcp2-1.25.0_1"
-    sha256 cellar: :any, sequoia: "a15562ff89f1ae262ac0f77b2fc184cc6b771e1da31a3228658a08aa25e5efb6"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/libngtcp2-1.26.0"
+    sha256 cellar: :any, sequoia: "5e9977792360748d95bb37ad4804c14ace9c70a2f5aee7029bad0d7819bdc4d6"
   end
 
   depends_on "metril/intel-bottles/pkgconf" => :build

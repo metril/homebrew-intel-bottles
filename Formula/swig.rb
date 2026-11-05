@@ -13,7 +13,7 @@ class Swig < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/swig-4.5.1"
-    sha256 sequoia: "daabfc1259f58485ef22d258fbb90ee76eb2da73dea6127c31ab234bc145ab42"
+    sha256 sequoia: "2ecbb7b8bf2732688bd6ab44c5a8cf50a9d5e55a523c6035019c3831ef96a7c3"
   end
 
   head do
@@ -30,6 +30,8 @@ class Swig < Formula
   on_linux do
     depends_on "zlib-ng-compat"
   end
+
+  allow_network_access! :test
 
   def install
     ENV.append "CXXFLAGS", "-std=c++11" # Fix `nullptr` support detection.
