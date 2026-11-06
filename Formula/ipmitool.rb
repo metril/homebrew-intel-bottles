@@ -14,7 +14,7 @@ class Ipmitool < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/ipmitool-1.8.19_3"
-    sha256 sequoia: "a18a7481736ea480865d7a0f2fd4a1f4220223c5417723d09d3b1626b949cdd9"
+    sha256 sequoia: "690557337516ad45e3a9a0f84643c99b2385c4890df5ab208a4aa17afe1e159d"
   end
 
   depends_on "metril/intel-bottles/autoconf" => :build
@@ -49,6 +49,14 @@ class Ipmitool < Formula
     sha256 "86eba5d0000b2d1f3ce3ba4a23ccb5dd762d01fec0f9910a95e756c5399d7fb8"
     type :backport
     resolves "https://github.com/ipmitool/ipmitool/issues/332"
+  end
+
+  deny_network_access!
+
+  # Download file with curl instead of using a resource as it is updated
+  # everyday without url change
+  def fetch
+    system "curl", "--output", buildpath/"enterprise-numbers", "http://www.iana.org/assignments/enterprise-numbers.txt"
   end
 
   def install
