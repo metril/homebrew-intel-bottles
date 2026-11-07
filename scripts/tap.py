@@ -158,6 +158,7 @@ def brew_update():
     run("brew", "update")
     os.environ["HOMEBREW_NO_AUTO_UPDATE"] = "1"  # already updated; keep the run stable
     os.environ["HOMEBREW_NO_INSTALL_CLEANUP"] = "1"
+    os.environ["HOMEBREW_NO_AUTOREMOVE"] = "1"  # uninstalling e.g. libssh2 must not drop its deps (openssl@4); brewed curl needs them
     os.environ["HOMEBREW_NO_INSTALL_UPGRADE"] = "1"  # do not upgrade preinstalled outdated deps (no Intel bottles to pour)
     os.environ["HOMEBREW_CURL_PATH"] = "/usr/bin/curl"  # brewed curl breaks mid-build (its dylib deps get uninstalled)
 
