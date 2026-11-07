@@ -1,15 +1,15 @@
 class Automake < Formula
   desc "Tool for generating GNU Standards-compliant Makefiles"
   homepage "https://www.gnu.org/software/automake/"
-  url "https://ftpmirror.gnu.org/automake/automake-1.19.tar.xz"
-  mirror "https://ftp.gnu.org/gnu/automake/automake-1.19.tar.xz"
-  sha256 "e3e2c2e3abf37898138db5b6c1d1dc35c9160c5978be7947d2c741705251d445"
-  license "GPL-2.0-or-later"
+  url "https://ftpmirror.gnu.org/automake/automake-1.20.tar.xz"
+  mirror "https://ftp.gnu.org/gnu/automake/automake-1.20.tar.xz"
+  sha256 "f6f34dad4cbe395715762b0710f7c511e39bd5cf777e6b95818ccbecf7714248"
+  license "GPL-3.0-or-later"
   compatibility_version 1
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/automake-1.19"
-    sha256 cellar: :any_skip_relocation, sequoia: "fc216e5ac5da757c61bd62f61387e56d77ef99231249c186c788ccdccff5ccf0"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/automake-1.20"
+    sha256 cellar: :any_skip_relocation, sequoia: "6e19c3694a6ef1c4adab02068ac720a2a4fba3e7c24f22bdbe23d9e64528cb3c"
   end
 
   depends_on "metril/intel-bottles/autoconf"

@@ -1,15 +1,15 @@
 class Fzf < Formula
   desc "Command-line fuzzy finder written in Go"
   homepage "https://junegunn.github.io/fzf/"
-  url "https://github.com/junegunn/fzf/archive/refs/tags/v0.74.5.tar.gz"
-  sha256 "5529d08897b85ae773695787c811ff9c9eeee32419c8a297fa1dbe586ed0a27e"
+  url "https://github.com/junegunn/fzf/archive/refs/tags/v0.75.0.tar.gz"
+  sha256 "165f6e0c1b9ba082346233681e3f1d1374e37f9fd3c1d7b6dfe09659ab893faa"
   license "MIT"
   compatibility_version 1
   head "https://github.com/junegunn/fzf.git", branch: "master"
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/fzf-0.74.5"
-    sha256 cellar: :any_skip_relocation, sequoia: "ed78875bb45784eb4f9c603a056a08bda2bf9cec0d88119fdec385ac18ff211e"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/fzf-0.75.0"
+    sha256 cellar: :any_skip_relocation, sequoia: "bcd6224ba53fb0fcf114843eb8e9a6a0c72d622398b956156a17ffcc177e140c"
   end
 
   depends_on "metril/intel-bottles/go" => :build

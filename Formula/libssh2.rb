@@ -16,7 +16,7 @@ class Libssh2 < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/libssh2-1.11.1_7"
-    sha256 cellar: :any, sequoia: "5e1d097d30e0ae799bb2f9304634063ca6271a3186488c56398f7d12d2ba2769"
+    sha256 cellar: :any, sequoia: "62064a0f4bafb623e5576190ca3814dd60c3b93a2766de8169551613651636f5"
   end
 
   head do
@@ -137,13 +137,17 @@ class Libssh2 < Formula
     resolves "OSV-2022-24", "OSV-2024-847"
   end
 
+  deny_network_access!
+
+  def openssl = deps.map { |d| d.name.split("/").last }.find { |d| d.match?(/^openssl(@\d+(\.\d+)*)?$/) }
+
   def install
     args = %W[
       --disable-silent-rules
       --disable-examples-build
       --with-openssl
       --with-libz
-      --with-libssl-prefix=#{formula_opt_prefix("openssl@4")}
+      --with-libssl-prefix=#{formula_opt_prefix(openssl)}
     ]
 
     system "./buildconf" if build.head?
