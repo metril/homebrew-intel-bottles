@@ -36,7 +36,7 @@ for f in $ordered; do
   [[ "$origin" == "$TAP" ]] && { echo "skip $f: already from tap"; continue; }
   echo "==> $f: switching to $TAP"
   ((dry)) && continue
-  brew uninstall --ignore-dependencies "$f"
+  brew uninstall --force --ignore-dependencies "$f"   # --force: remove every installed version
   brew install "$TAP/$f"
 done
 echo "Done. From now on use plain: brew update && brew upgrade"
