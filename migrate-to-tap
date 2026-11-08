@@ -3,6 +3,8 @@
 # Usage: migrate-to-tap [--dry-run]
 set -euo pipefail
 TAP="${BOTTLE_TAP:-metril/intel-bottles}"
+# Don't let uninstall/cleanup autoremove deps mid-migration (they'd vanish before we switch them).
+export HOMEBREW_NO_AUTOREMOVE=1
 dry=0; [[ "${1:-}" == "--dry-run" ]] && dry=1
 
 brew update
@@ -26,7 +28,7 @@ for f in $installed; do
 done
 
 for f in $ordered; do
-  printf '%s' "$installed" | grep -Fxq -- "$f" || continue          # installed only
+  [[ -d "$(brew --cellar)/$f" ]] || continue                        # installed (now) only
   [[ -f "$tapdir/$f.rb" ]] || continue                              # tap provides it
   grep -q 'sequoia:' "$tapdir/$f.rb" || { echo "skip $f: not bottled in tap yet"; continue; }
   # Read the keg's receipt: `brew info .tap` reports where the name resolves now, not where the keg came from.
