@@ -14,9 +14,13 @@ tapdir="$(brew --repository "$TAP")/Formula"
 installed="$(brew list --formula -1)"
 
 # Dependency order: deps first (brew deps --topological lists deps before dependents).
+# Use the tap formula's deps: `brew install $TAP/f` refuses any dep still installed from homebrew/core,
+# and the tap's dep tree can differ from the installed core keg's.
 ordered=""
 for f in $installed; do
-  for d in $(brew deps --topological "$f" 2>/dev/null) "$f"; do
+  [[ -f "$tapdir/$f.rb" ]] || continue
+  for d in $(brew deps --topological "$TAP/$f" 2>/dev/null) "$f"; do
+    d="${d##*/}"
     printf '%s' "$ordered" | grep -Fxq -- "$d" || ordered="$ordered$d"$'\n'
   done
 done
