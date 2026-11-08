@@ -27,7 +27,7 @@ class Libnghttp2 < Formula
     depends_on "metril/intel-bottles/libtool" => :build
   end
 
-  depends_on "metril/intel-bottles/pkgconf" => :build
+  depends_on "pkgconf" => :build
 
   # These used to live in `nghttp2`.
   link_overwrite "include/nghttp2"

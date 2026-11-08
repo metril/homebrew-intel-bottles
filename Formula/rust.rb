@@ -92,7 +92,7 @@ class Rust < Formula
   depends_on "metril/intel-bottles/libssh2"
   depends_on "metril/intel-bottles/llvm"
   depends_on "metril/intel-bottles/openssl@4"
-  depends_on "metril/intel-bottles/pkgconf"
+  depends_on "pkgconf"
   depends_on "metril/intel-bottles/sqlite"
 
   uses_from_macos "python" => :build

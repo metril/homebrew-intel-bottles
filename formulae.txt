@@ -1,5 +1,6 @@
 # One formula per line (from `brew leaves`). Comments and blank lines are ignored.
 # python-requests is omitted: it was removed from homebrew-core in Sept 2024.
+# pkgconf is omitted: Homebrew rebuilds it from homebrew/core when its macOS version differs (see CORE_ONLY in scripts/tap.py).
 # vault is omitted: it comes from hashicorp/tap (prebuilt binaries), not homebrew-core.
 chezmoi
 cloudflared
@@ -10,7 +11,6 @@ go
 iperf3
 ipmitool
 jq
-pkgconf
 python@3.13
 rclone
 restic

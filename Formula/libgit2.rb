@@ -19,7 +19,7 @@ class Libgit2 < Formula
   end
 
   depends_on "metril/intel-bottles/cmake" => :build
-  depends_on "metril/intel-bottles/pkgconf" => :build
+  depends_on "pkgconf" => :build
   depends_on "metril/intel-bottles/libssh2"
   depends_on "metril/intel-bottles/llhttp"
   depends_on "metril/intel-bottles/openssl@4"

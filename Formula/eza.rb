@@ -12,7 +12,7 @@ class Eza < Formula
   end
 
   depends_on "metril/intel-bottles/pandoc" => :build
-  depends_on "metril/intel-bottles/pkgconf" => :build
+  depends_on "pkgconf" => :build
   depends_on "metril/intel-bottles/rust" => :build
   depends_on "metril/intel-bottles/libgit2"
 

@@ -21,7 +21,7 @@ class Subversion < Formula
   end
 
   depends_on "metril/intel-bottles/gettext" => :build
-  depends_on "metril/intel-bottles/pkgconf" => :build
+  depends_on "pkgconf" => :build
   depends_on "metril/intel-bottles/python-setuptools" => :build
   depends_on "metril/intel-bottles/python@3.15" => [:build, :test]
   depends_on "metril/intel-bottles/swig" => :build

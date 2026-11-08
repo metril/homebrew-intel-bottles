@@ -25,7 +25,7 @@ class Git < Formula
   end
 
   depends_on "metril/intel-bottles/gettext" => :build
-  depends_on "metril/intel-bottles/pkgconf" => :build
+  depends_on "pkgconf" => :build
   # TODO: Replace with `uses_from_macos` once Apple fixes their CA bundle.
   depends_on "metril/intel-bottles/curl"
   depends_on "metril/intel-bottles/pcre2"

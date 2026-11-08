@@ -20,7 +20,7 @@ class PythonAT315 < Formula
   deprecate! date: "2031-11-01", because: :deprecated_upstream
   disable! date: "2032-11-01", because: :deprecated_upstream
 
-  depends_on "metril/intel-bottles/pkgconf" => :build
+  depends_on "pkgconf" => :build
   depends_on "metril/intel-bottles/ca-certificates" => :no_linkage
   depends_on "metril/intel-bottles/mpdecimal"
   depends_on "metril/intel-bottles/openssl@4"

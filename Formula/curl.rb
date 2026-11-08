@@ -30,7 +30,7 @@ class Curl < Formula
 
   keg_only :provided_by_macos
 
-  depends_on "metril/intel-bottles/pkgconf" => [:build, :test]
+  depends_on "pkgconf" => [:build, :test]
   depends_on "metril/intel-bottles/brotli"
   depends_on "metril/intel-bottles/libnghttp2"
   depends_on "metril/intel-bottles/libnghttp3"

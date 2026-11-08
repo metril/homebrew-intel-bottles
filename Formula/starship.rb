@@ -12,7 +12,7 @@ class Starship < Formula
   end
 
   depends_on "metril/intel-bottles/cmake" => :build
-  depends_on "metril/intel-bottles/pkgconf" => :build
+  depends_on "pkgconf" => :build
   depends_on "metril/intel-bottles/rust" => :build
 
   on_linux do

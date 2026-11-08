@@ -33,7 +33,7 @@ class ApacheSerf < Formula
   end
 
   depends_on "metril/intel-bottles/scons" => :build
-  depends_on "metril/intel-bottles/pkgconf" => :test
+  depends_on "pkgconf" => :test
   depends_on "metril/intel-bottles/apr"
   depends_on "metril/intel-bottles/apr-util"
   depends_on "metril/intel-bottles/openssl@4"

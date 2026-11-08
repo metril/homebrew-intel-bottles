@@ -13,7 +13,7 @@ class Libngtcp2 < Formula
     sha256 cellar: :any, sequoia: "5e9977792360748d95bb37ad4804c14ace9c70a2f5aee7029bad0d7819bdc4d6"
   end
 
-  depends_on "metril/intel-bottles/pkgconf" => :build
+  depends_on "pkgconf" => :build
   depends_on "metril/intel-bottles/openssl@4"
 
   deny_network_access!

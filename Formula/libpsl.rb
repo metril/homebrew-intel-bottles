@@ -13,7 +13,7 @@ class Libpsl < Formula
     sha256 cellar: :any, sequoia: "361c34480d378f22e04dbfe0a0bca42454ad656c51850ddec9c6f1b545a4bf3d"
   end
 
-  depends_on "metril/intel-bottles/pkgconf" => :build
+  depends_on "pkgconf" => :build
 
   on_system :linux, macos: :monterey_or_older do
     depends_on "libidn2"

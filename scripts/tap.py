@@ -29,6 +29,11 @@ def read_list():
     return [l for l in lines if l]
 
 
+# Left to homebrew/core, never mirrored. Homebrew force-rebuilds pkgconf from core whenever it was
+# built on a different macOS major version (our bottles: Sequoia), which would clash with a tap copy.
+CORE_ONLY = {"pkgconf"}
+
+
 def resolve_all(leaves):
     """Return (ordered names, infos). Mirrored set = leaves + recursive runtime deps.
     Order puts runtime deps, and mirrored build deps, before dependents."""
@@ -46,6 +51,8 @@ def resolve_all(leaves):
     mirrored = set()
 
     def collect(name):
+        if name in CORE_ONLY:
+            return
         info = info_of(name)
         if info is None or info["name"] in mirrored:
             return
@@ -93,10 +100,12 @@ NOAUTOBUMP_RE = re.compile(r"^[ \t]*no_autobump!(?:.*,[ \t]*\n[ \t]+)*.*\n", re.
 def prefix_deps(text, mirrored):
     def sub(m):
         name, rest = m.group(2), m.group(3)
-        if name in mirrored:
+        if name in mirrored and name not in CORE_ONLY:
             return f'{m.group(1)}"{TAP}/{name}"{rest}'
         return m.group(0)
 
+    for name in CORE_ONLY:
+        text = text.replace(f'"{TAP}/{name}"', f'"{name}"')
     return DEP_RE.sub(sub, text)
 
 
