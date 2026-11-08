@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# One-time migration: reinstall formulae from metril/intel-bottles so plain `brew upgrade` works.
+# Migration (idempotent; re-run when new bottles land): reinstall formulae from metril/intel-bottles so plain `brew upgrade` works.
 # Usage: migrate-to-tap [--dry-run]
 set -euo pipefail
 TAP="${BOTTLE_TAP:-metril/intel-bottles}"
@@ -25,7 +25,8 @@ for f in $ordered; do
   printf '%s' "$installed" | grep -Fxq -- "$f" || continue          # installed only
   [[ -f "$tapdir/$f.rb" ]] || continue                              # tap provides it
   grep -q 'sequoia:' "$tapdir/$f.rb" || { echo "skip $f: not bottled in tap yet"; continue; }
-  origin="$(brew info --json=v2 --installed "$f" | jq -r '.formulae[0].tap // empty' 2>/dev/null || true)"
+  # Read the keg's receipt: `brew info .tap` reports where the name resolves now, not where the keg came from.
+  origin="$(jq -r '.source.tap // empty' "$(brew --prefix)/opt/$f/INSTALL_RECEIPT.json" 2>/dev/null || true)"
   [[ "$origin" == "$TAP" ]] && { echo "skip $f: already from tap"; continue; }
   echo "==> $f: switching to $TAP"
   ((dry)) && continue

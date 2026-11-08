@@ -10,7 +10,7 @@ One time:
 ```sh
 ./migrate-to-tap [--dry-run]
 ```
-It taps and trusts the repo, then reinstalls bottled formulae from it in dependency order. After that, plain `brew update && brew upgrade` works. Formulae not yet bottled in the tap are skipped; re-run later.
+It taps and trusts the repo, then reinstalls bottled formulae from it in dependency order. After that, plain `brew update && brew upgrade` works. Formulae not yet bottled in the tap are skipped. Re-run it whenever new bottles land; it only switches kegs still installed from homebrew/core (it checks each keg's install receipt).
 
 ## Deadlines
 GitHub retires `macos-15-intel` around Aug 2027; Homebrew drops Intel in Sept 2027. Plan a move (e.g. MacPorts) before then.
