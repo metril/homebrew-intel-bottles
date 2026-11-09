@@ -13,12 +13,14 @@ class Oniguruma < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/oniguruma-6.9.10"
-    sha256 cellar: :any, sequoia: "11cadbe69abcdde42e4e5dbf830e24d24c0c276c06e3dd38e7b64ae81d4de444"
+    sha256 cellar: :any, sequoia: "f69da0fabbd26fc92262f65e6849b1778df929ceb2b5bc40a686d58e276c91a4"
   end
 
   depends_on "metril/intel-bottles/autoconf" => :build
   depends_on "metril/intel-bottles/automake" => :build
   depends_on "metril/intel-bottles/libtool" => :build
+
+  deny_network_access!
 
   def install
     system "autoreconf", "--force", "--install", "--verbose"
