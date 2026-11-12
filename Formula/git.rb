@@ -20,15 +20,14 @@ class Git < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/git-2.56.1"
-    sha256 sequoia: "699fbdfc6ef29bd058e8712c46f521532d7e967a7e5fa5d52acd92b520eff1c9"
+    sha256 sequoia: "9aa5ea5f8f8102b9d7a95cbda2170169d13b4bce5b5498419e56f7e0e9c1fa2d"
   end
 
   depends_on "metril/intel-bottles/gettext" => :build
   depends_on "pkgconf" => :build
-  # TODO: Replace with `uses_from_macos` once Apple fixes their CA bundle.
-  depends_on "metril/intel-bottles/curl"
   depends_on "metril/intel-bottles/pcre2"
 
+  uses_from_macos "curl"
   uses_from_macos "expat"
 
   # Don't try to add a libiconv dependency without reading this PR first:
