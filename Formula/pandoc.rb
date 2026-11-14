@@ -1,15 +1,15 @@
 class Pandoc < Formula
   desc "Swiss-army knife of markup format conversion"
   homepage "https://pandoc.org/"
-  url "https://github.com/jgm/pandoc/archive/refs/tags/3.13.tar.gz"
-  sha256 "fbf6044766b0c9be5ccbf18ffe657124449e8563a177d85662ecb6f031f9c308"
+  url "https://github.com/jgm/pandoc/archive/refs/tags/3.14.tar.gz"
+  sha256 "e4c4292642531b94793c2f5dea38f3b8d5424b2d048818a4d047f8b8320b999a"
   license "GPL-2.0-or-later"
   compatibility_version 10
   head "https://github.com/jgm/pandoc.git", branch: "main"
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/pandoc-3.13"
-    sha256 cellar: :any, sequoia: "ebf8470e9dd7029f74ff139eadd33eaf9ecaa9d0aba451d9c7cac22be17a0467"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/pandoc-3.14"
+    sha256 cellar: :any, sequoia: "3710f86c072b8736a429377aca70de91381b81aefdaeadc40d6603a9123a4ee2"
   end
 
   depends_on "metril/intel-bottles/cabal-install" => :build

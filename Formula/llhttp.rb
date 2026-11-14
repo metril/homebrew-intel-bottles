@@ -1,14 +1,14 @@
 class Llhttp < Formula
   desc "Port of http_parser to llparse"
   homepage "https://llhttp.org/"
-  url "https://github.com/nodejs/llhttp/archive/refs/tags/release/v9.4.3.tar.gz"
-  sha256 "1eb813c7437b31a87496a1cd3ed79f00746720f5e7e29c79b42c02cb69f36c39"
+  url "https://github.com/nodejs/llhttp/archive/refs/tags/release/v9.4.4.tar.gz"
+  sha256 "5600adb1498f82a9c719b8eb19310021737388e0d92362a6d47be532710d3c96"
   license "MIT"
   compatibility_version 2
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/llhttp-9.4.3"
-    sha256 cellar: :any, sequoia: "45089beda9c39c2269763f1c3e9283e2f681f58fa5efc01784811366d3944cd5"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/llhttp-9.4.4"
+    sha256 cellar: :any, sequoia: "65597687dcbe178ee917f3ce8bb00a370119b876d43ddd0bf7cb3b7fc909b1de"
   end
 
   depends_on "metril/intel-bottles/cmake" => :build
