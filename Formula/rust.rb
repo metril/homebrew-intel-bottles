@@ -85,7 +85,7 @@ class Rust < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/rust-1.100.0"
-    sha256 cellar: :any, sequoia: "e9ecac65babacbc2bcd1845c4d0ba0d3e308c0d7d444fde174f473454b3bdbc3"
+    sha256 cellar: :any, sequoia: "650cd71ab2814c1acb81217b9af158f157606317c835715a3cf308a1edef4bbf"
   end
 
   depends_on "metril/intel-bottles/libgit2"
@@ -124,6 +124,10 @@ class Rust < Formula
       # Fix build failure for compiler_builtins "error: invalid deployment target
       # for -stdlib=libc++ (requires OS X 10.7 or later)"
       ENV["MACOSX_DEPLOYMENT_TARGET"] = MacOS.version
+
+      # Match the value used by Rust CI at
+      # https://github.com/rust-lang/rust/blob/main/src/ci/github-actions/jobs.yml
+      ENV["MACOSX_STD_DEPLOYMENT_TARGET"] = Hardware::CPU.arm? ? "11.0" : "10.12"
 
       inreplace "src/tools/cargo/Cargo.toml",
                 /^curl\s*=\s*"(.+)"$/,
