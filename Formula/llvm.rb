@@ -2,13 +2,12 @@ class Llvm < Formula
   desc "Next-gen compiler infrastructure"
   homepage "https://llvm.org/"
   license "Apache-2.0" => { with: "LLVM-exception" }
-  revision 1
   compatibility_version 2
   head "https://github.com/llvm/llvm-project.git", branch: "main"
 
   stable do
-    url "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.5/llvm-project-23.1.5.src.tar.xz"
-    sha256 "fb50b1eac93ddeb3aa8dab4cfe324dff74f4a9c2bdee6160c9e36188f8d06a6e"
+    url "https://github.com/llvm/llvm-project/releases/download/llvmorg-23.1.6/llvm-project-23.1.6.src.tar.xz"
+    sha256 "d3b86ab29cfb4445a6652e5c2642ccc75e04e38084dde3701d323320f35a31da"
 
     # Fix triple config loading for clang-cl
     patch do
@@ -24,8 +23,8 @@ class Llvm < Formula
   end
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/llvm-23.1.5_1"
-    sha256 cellar: :any, sequoia: "db8079b3d2a13c9e652f49cb6a91b866197ca233085ecad762e24056781b0c01"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/llvm-23.1.6"
+    sha256 cellar: :any, sequoia: "cbf7dfa28c21de1636c51723e89bd3c472c0df1b1962e03168dddcc79530974e"
   end
 
   keg_only :provided_by_macos
@@ -419,53 +418,51 @@ class Llvm < Formula
 
     return unless lto_build
 
-    lib.glob("*.a").each { |static_archive| convert_lto_archive(static_archive) }
-  end
+    # Convert LTO-generated bitcode in our static archives to Mach-O.
+    # Archives with unique member names keep flat extraction and replacement.
+    # Only archives containing duplicate names require per-occurrence extraction
+    # and rebuilding: flat extraction overwrites same-named members, while
+    # `llvm-ar r` replaces only the first matching member.
+    #
+    # Adapted from Fedora:
+    # https://src.fedoraproject.org/rpms/redhat-rpm-config/blob/1c5e204554732b224956618610a990e7acd74f62/f/brp-llvm-compile-lto-elf
+    lib.glob("*.a").each do |static_archive|
+      mktemp do
+        members = Utils.safe_popen_read(bin/"llvm-ar", "t", static_archive).split("\n")
+        has_duplicates = members.uniq.length != members.length
 
-  # Convert LTO-generated bitcode in our static archives to Mach-O.
-  # Archives with unique member names keep flat extraction and replacement.
-  # Only archives containing duplicate names require per-occurrence extraction
-  # and rebuilding: flat extraction overwrites same-named members, while
-  # `llvm-ar r` replaces only the first matching member.
-  #
-  # Adapted from Fedora:
-  # https://src.fedoraproject.org/rpms/redhat-rpm-config/blob/1c5e204554732b224956618610a990e7acd74f62/f/brp-llvm-compile-lto-elf
-  def convert_lto_archive(static_archive)
-    mktemp do
-      members = Utils.safe_popen_read(bin/"llvm-ar", "t", static_archive).split("\n")
-      has_duplicates = members.uniq.length != members.length
-
-      member_files = if has_duplicates
-        occurrences = Hash.new(0)
-        members.each_with_index.map do |member, index|
-          member_dir = Pathname.pwd/index.to_s
-          member_dir.mkpath
-          occurrences[member] += 1
-          system bin/"llvm-ar", "xN", occurrences[member].to_s, static_archive, member,
-                 "--output=#{member_dir}"
-          member_dir/member
+        member_files = if has_duplicates
+          occurrences = Hash.new(0)
+          members.each_with_index.map do |member, index|
+            member_dir = Pathname.pwd/index.to_s
+            member_dir.mkpath
+            occurrences[member] += 1
+            system bin/"llvm-ar", "xN", occurrences[member].to_s, static_archive, member,
+                   "--output=#{member_dir}"
+            member_dir/member
+          end
+        else
+          system bin/"llvm-ar", "x", static_archive
+          Pathname.glob("*.o")
         end
-      else
-        system bin/"llvm-ar", "x", static_archive
-        Pathname.glob("*.o")
-      end
 
-      converted_files = member_files.select do |bc_file|
-        file_type = Utils.safe_popen_read("file", "--brief", bc_file)
-        next false unless file_type.match?(/^LLVM (IR )?bitcode/)
+        converted_files = member_files.select do |bc_file|
+          file_type = Utils.safe_popen_read("file", "--brief", bc_file)
+          next false unless file_type.match?(/^LLVM (IR )?bitcode/)
 
-        system bin/"clang", "-fno-lto", "-Wno-unused-command-line-argument",
-                            "-x", "ir", bc_file, "-c", "-o", bc_file
-        true
-      end
-      next if converted_files.empty?
+          system bin/"clang", "-fno-lto", "-Wno-unused-command-line-argument",
+                              "-x", "ir", bc_file, "-c", "-o", bc_file
+          true
+        end
+        next if converted_files.empty?
 
-      if has_duplicates
-        rebuilt_archive = Pathname.pwd/static_archive.basename
-        system bin/"llvm-ar", "qcs", rebuilt_archive, *member_files
-        mv rebuilt_archive, static_archive
-      else
-        system bin/"llvm-ar", "r", static_archive, *converted_files
+        if has_duplicates
+          rebuilt_archive = Pathname.pwd/static_archive.basename
+          system bin/"llvm-ar", "qcs", rebuilt_archive, *member_files
+          mv rebuilt_archive, static_archive
+        else
+          system bin/"llvm-ar", "r", static_archive, *converted_files
+        end
       end
     end
   end

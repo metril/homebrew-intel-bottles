@@ -29,7 +29,7 @@ class ApacheSerf < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/apache-serf-1.3.10_1"
-    sha256 cellar: :any, sequoia: "186502d823ea306168a382e78e7bb168a6fefc9763d8e54a18ae43f5c26c4cde"
+    sha256 cellar: :any, sequoia: "5f92c396a94314625cb08658761d1702e5f450a35b637f5f836a29580149f592"
   end
 
   depends_on "metril/intel-bottles/scons" => :build
@@ -46,8 +46,6 @@ class ApacheSerf < Formula
 
   deny_network_access!
 
-  def openssl = "openssl@4"
-
   def install
     # scons ignores our compiler and flags unless explicitly passed
     args = %W[
@@ -57,7 +55,7 @@ class ApacheSerf < Formula
       CFLAGS=#{ENV.cflags}
       GSSAPI=#{OS.mac? ? MacOS.sdk_for_formula(self).path/"usr" : formula_opt_prefix("krb5")}
       LINKFLAGS=#{ENV.ldflags}
-      OPENSSL=#{formula_opt_prefix(openssl)}
+      OPENSSL=#{formula_opt_prefix("openssl@4")}
       PREFIX=#{prefix}
     ]
     args << "ZLIB=#{formula_opt_prefix("zlib-ng-compat")}" if OS.linux?
