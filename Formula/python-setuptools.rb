@@ -8,7 +8,7 @@ class PythonSetuptools < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/python-setuptools-84.2.1"
-    sha256 cellar: :any_skip_relocation, sequoia: "261f1e68b54ef30aa7ec8dc9cb6f2ba403a054b7c0e4f2944f224edd6929b271"
+    sha256 cellar: :any_skip_relocation, sequoia: "06264b3c3456036d14ede83f193f06154084a48787fc8e82a746cd91bb42c156"
   end
 
   depends_on "metril/intel-bottles/python@3.15" => [:build, :test]
@@ -22,7 +22,8 @@ class PythonSetuptools < Formula
     # Add symlinks to use on all externally-managed pythons
     extra_pythons = Keg.for(python3).to_formula.versioned_formulae.select { |f| f.version >= "3.12" }
     extra_site_packages_list = extra_pythons.map { |f| lib/"python#{f.version.major_minor}/site-packages" }
-    extra_site_packages_list << (lib/"python#{Formula["python-freethreading"].version.major_minor}t/site-packages")
+    python_version = Formula["python-freethreading"].version.major_minor
+    extra_site_packages_list << (lib/"python#{python_version}t/site-packages")
     site_packages = prefix/Language::Python.site_packages(python3)
     site_packages.find.select(&:file?).each do |path|
       extra_site_packages_list.each do |extra_site_packages|
