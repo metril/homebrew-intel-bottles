@@ -29,7 +29,7 @@ class ApacheSerf < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/apache-serf-1.3.10_1"
-    sha256 cellar: :any, sequoia: "5f92c396a94314625cb08658761d1702e5f450a35b637f5f836a29580149f592"
+    sha256 cellar: :any, sequoia: "0c9375c006dfbfdabf24815f257bfb43cf8190288cd878a2d31bf226dacace6c"
   end
 
   depends_on "metril/intel-bottles/scons" => :build
@@ -48,12 +48,17 @@ class ApacheSerf < Formula
 
   def install
     # scons ignores our compiler and flags unless explicitly passed
+    gssapi_dir = if OS.mac?
+      MacOS.sdk_for_formula(self).path/"usr"
+    else
+      formula_opt_prefix("krb5")
+    end
     args = %W[
       APR=#{formula_opt_prefix("apr")}
       APU=#{formula_opt_prefix("apr-util")}
       CC=#{ENV.cc}
       CFLAGS=#{ENV.cflags}
-      GSSAPI=#{OS.mac? ? MacOS.sdk_for_formula(self).path/"usr" : formula_opt_prefix("krb5")}
+      GSSAPI=#{gssapi_dir}
       LINKFLAGS=#{ENV.ldflags}
       OPENSSL=#{formula_opt_prefix("openssl@4")}
       PREFIX=#{prefix}
