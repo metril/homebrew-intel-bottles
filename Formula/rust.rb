@@ -85,7 +85,7 @@ class Rust < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/rust-1.100.0"
-    sha256 cellar: :any, sequoia: "650cd71ab2814c1acb81217b9af158f157606317c835715a3cf308a1edef4bbf"
+    sha256 cellar: :any, sequoia: "f6300390001bde8e05a0b290bf03eae4a41b00dcc05f3f0536c1ca30a93fb359"
   end
 
   depends_on "metril/intel-bottles/libgit2"
@@ -161,6 +161,7 @@ class Rust < Formula
       rust-demangler
       src
     ]
+    release_channel = build.head? ? "nightly" : "stable"
     args = %W[
       --prefix=#{prefix}
       --sysconfdir=#{etc}
@@ -172,7 +173,7 @@ class Rust < Formula
       --disable-cargo-native-static
       --disable-docs
       --disable-lld
-      --release-channel=#{build.head? ? "nightly" : "stable"}
+      --release-channel=#{release_channel}
       --release-description=#{tap.user}
       --set=build.allocator=jemalloc
     ]

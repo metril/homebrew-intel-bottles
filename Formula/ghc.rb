@@ -17,7 +17,7 @@ class Ghc < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/ghc-9.14.1"
-    sha256 cellar: :any, sequoia: "441deb8b4e10bb63a3f96cfba50b883e2f814831f292e2abacec21c62b5f2b4a"
+    sha256 cellar: :any, sequoia: "fe68158a22bf41790a8767f3f5d6fb0815698c8b2e29d699086a506046dc7abd"
   end
 
   depends_on "metril/intel-bottles/autoconf" => :build
@@ -145,7 +145,11 @@ class Ghc < Formula
     ENV.deparallelize { system "hadrian/build", "install", *hadrian_args }
 
     bash_completion.install "utils/completion/ghc.bash" => "ghc"
-    ghc_libdir = build.head? ? lib.glob("ghc-*").first : lib/"ghc-#{version}"
+    ghc_libdir = if build.head?
+      lib.glob("ghc-*").first
+    else
+      lib/"ghc-#{version}"
+    end
     (ghc_libdir/"lib/package.conf.d/package.cache").unlink
     (ghc_libdir/"lib/package.conf.d/package.cache.lock").unlink
   end

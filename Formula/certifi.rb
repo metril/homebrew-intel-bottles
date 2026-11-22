@@ -1,14 +1,14 @@
 class Certifi < Formula
   desc "Mozilla CA bundle for Python"
   homepage "https://github.com/certifi/python-certifi"
-  url "https://files.pythonhosted.org/packages/fd/11/b524cbd9bbdaca58608e4cf4053fd463417549e1959fa8d3aa18319f9555/certifi-2026.10.23.tar.gz"
-  sha256 "a9895e6e2758b371e0545e321a3a8fd1fcfd9829ada8824a936dfb16aaaf36cd"
+  url "https://files.pythonhosted.org/packages/51/33/4cd27639502f010084bcef7a2036391dd637439901341ce1a530f36f6e51/certifi-2026.11.20.tar.gz"
+  sha256 "af1cb240a8133f105aa52684a3a3258339d7f2fd0bd4e2812698ff5cf5588c4e"
   license "MPL-2.0"
   compatibility_version 1
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/certifi-2026.10.23"
-    sha256 cellar: :any_skip_relocation, sequoia: "4f7c38eb99091ea5463342e00d6552b74f47b8c8ff371d488a0d9baf708d0278"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/certifi-2026.11.20"
+    sha256 cellar: :any_skip_relocation, sequoia: "04427a3dd043c5378e1337ea55e1a32a566a2f7541e99b922ea437200a5f2663"
   end
 
   depends_on "metril/intel-bottles/python-setuptools" => :build
@@ -28,7 +28,8 @@ class Certifi < Formula
     # Add symlinks to use on all externally-managed pythons
     extra_pythons = Keg.for(python3).to_formula.versioned_formulae.select { |f| f.version >= "3.12" }
     extra_site_packages_list = extra_pythons.map { |f| lib/"python#{f.version.major_minor}/site-packages" }
-    extra_site_packages_list << (lib/"python#{Formula["python-freethreading"].version.major_minor}t/site-packages")
+    python_version = Formula["python-freethreading"].version.major_minor
+    extra_site_packages_list << (lib/"python#{python_version}t/site-packages")
     site_packages.find.select(&:file?).each do |path|
       extra_site_packages_list.each do |extra_site_packages|
         (extra_site_packages/path.relative_path_from(site_packages)).dirname.install_symlink path
