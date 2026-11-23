@@ -24,7 +24,7 @@ class Llvm < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/llvm-23.1.6"
-    sha256 cellar: :any, sequoia: "b84b45b05e05844241f9c93513c0f17ba240f51cddff9848b8e09e330bbf5dd6"
+    sha256 cellar: :any, sequoia: "03491a96a2f14fa90004c341cd813cac32ad8a2a7e5cc55025cb63b2c95b7f9b"
   end
 
   keg_only :provided_by_macos
@@ -267,7 +267,7 @@ class Llvm < Formula
         ]
         linux_linker_flags = linux_library_paths.map { |path| "-L#{path} -Wl,-rpath,#{path}" }
         # Add opt_libs for dependencies to RPATH.
-        linux_linker_flags += deps.map(&:to_formula).map { |dep| "-Wl,-rpath,#{dep.opt_lib}" }
+        linux_linker_flags += deps.map { |dep| "-Wl,-rpath,#{dep.opt_lib}" }
 
         [args, extra_args].each do |arg_array|
           # Add the linker paths to the arguments passed to the temporary compilers and installed toolchain.
