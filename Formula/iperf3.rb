@@ -12,7 +12,7 @@ class Iperf3 < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/iperf3-3.22.1"
-    sha256 cellar: :any, sequoia: "df485c53bd3889dc5fbc154c5c341c441b63c8f302980376f0ac7d0413424e2d"
+    sha256 cellar: :any, sequoia: "ead8bb377f83d7f006185c06869692c893f004f319c30d760bb31c7e13777b11"
   end
 
   head do
@@ -29,9 +29,10 @@ class Iperf3 < Formula
 
   def install
     system "./bootstrap.sh" if build.head?
+    openssl_prefix = dep("openssl").opt_prefix
     system "./configure", "--disable-silent-rules",
                           "--disable-profiling",
-                          "--with-openssl=#{formula_opt_prefix("openssl@4")}",
+                          "--with-openssl=#{openssl_prefix}",
                           *std_configure_args
     system "make", "clean" # there are pre-compiled files in the tarball
     system "make", "install"
@@ -39,11 +40,9 @@ class Iperf3 < Formula
 
   test do
     port = free_port
-    pid = spawn bin/"iperf3", "--server", "--port", port.to_s
-    sleep 1
-    assert_match "Bitrate", shell_output("#{bin}/iperf3 --client 127.0.0.1 --port #{port} --time 1")
-  ensure
-    Process.kill("SIGINT", pid)
-    Process.wait(pid)
+    with_test_process(bin/"iperf3", "--server", "--port", port.to_s, signal: "INT") do
+      sleep 1
+      assert_match "Bitrate", shell_output("#{bin}/iperf3 --client 127.0.0.1 --port #{port} --time 1")
+    end
   end
 end

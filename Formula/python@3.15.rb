@@ -13,7 +13,7 @@ class PythonAT315 < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/python-3.15-3.15.2"
-    sha256 sequoia: "722d0e02ced5ab29566d260f0be8486de79d891ceca19a0f51a6fb404eab5185"
+    sha256 sequoia: "9edea878d82dd1ce9480ffe9e46e91133534a3ac3142c4c7e9ce9a5cdef12403"
   end
 
   # https://devguide.python.org/versions/#versions
@@ -96,7 +96,7 @@ class PythonAT315 < Formula
   deny_network_access!
 
   def install
-    openssl = deps.find { |dep| dep.name.split("/").last.start_with?("openssl@") }.name
+    openssl = dep("openssl").name
     # Unset these so that installing pip and setuptools puts them where we want
     # and not into some other Python the user has installed.
     ENV["PYTHONHOME"] = nil

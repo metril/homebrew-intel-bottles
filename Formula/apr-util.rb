@@ -9,7 +9,7 @@ class AprUtil < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/apr-util-1.6.6"
-    sha256 sequoia: "1bf886633a8738245ace99a96f4a96cbfe065a09bfcddc6a8fa79979c9847924"
+    sha256 sequoia: "602e83a696a9e477728eaaafcf870d8e53a6d28c07983cb20dae5a464b491130"
   end
 
   keg_only :shadowed_by_macos, "Apple's CLT provides apr (but not apr-util)"
@@ -28,9 +28,10 @@ class AprUtil < Formula
   deny_network_access!
 
   def install
+    openssl_prefix = dep("openssl").opt_prefix
     system "./configure", "--with-apr=#{formula_opt_prefix("apr")}",
                           "--with-crypto",
-                          "--with-openssl=#{formula_opt_prefix("openssl@4")}",
+                          "--with-openssl=#{openssl_prefix}",
                           "--without-pgsql",
                           *std_configure_args
     system "make"

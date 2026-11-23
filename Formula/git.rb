@@ -20,7 +20,7 @@ class Git < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/git-2.56.1"
-    sha256 sequoia: "9aa5ea5f8f8102b9d7a95cbda2170169d13b4bce5b5498419e56f7e0e9c1fa2d"
+    sha256 sequoia: "ca3fd21255d920d98e4b4fa812c3e032127fc139da1f309c02e3ef012b54aa4f"
   end
 
   depends_on "metril/intel-bottles/gettext" => :build
@@ -115,8 +115,7 @@ class Git < Formula
     args += if OS.mac?
       %w[NO_OPENSSL=1 APPLE_COMMON_CRYPTO=1]
     else
-      openssl_prefix = formula_opt_prefix("openssl@4")
-
+      openssl_prefix = dep("openssl").opt_prefix
       %W[NO_APPLE_COMMON_CRYPTO=1 OPENSSLDIR=#{openssl_prefix}]
     end
 
