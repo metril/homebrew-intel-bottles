@@ -9,7 +9,7 @@ class CabalInstall < Formula
 
   bottle do
     root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/cabal-install-3.18.2.0"
-    sha256 cellar: :any, sequoia: "b8131d8bdf6170050fd2dbca693ee383f0ee77bf81d24268a757c085cd3fbd64"
+    sha256 cellar: :any, sequoia: "f5ed9990f489f083cf9b5a6740d60ea6af686e7d3c23e9dbb123e013f9a49b05"
   end
 
   depends_on "metril/intel-bottles/ghc" => [:build, :test]
@@ -45,12 +45,18 @@ class CabalInstall < Formula
     end
   end
 
-  def install
+  allow_network_access! :test
+
+  def fetch
     resource("bootstrap").stage(buildpath/"bin")
-    cabal = buildpath/"bin/cabal"
     cd "cabal-install" if build.head?
-    system cabal, "v2-update"
-    system cabal, "v2-install", *std_cabal_v2_args
+    system buildpath/"bin/cabal", "v2-update"
+    system buildpath/"bin/cabal", "v2-install", "--only-download", *std_cabal_v2_args
+  end
+
+  def install
+    cd "cabal-install" if build.head?
+    system buildpath/"bin/cabal", "v2-install", *std_cabal_v2_args
     bash_completion.install "bash-completion/cabal"
   end
 
