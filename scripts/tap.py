@@ -9,10 +9,16 @@ ROOT = Path(__file__).resolve().parent.parent
 FORMULA_DIR = ROOT / "Formula"
 
 
-def run(*cmd, check=True, capture=False, cwd=None):
-    print("+", " ".join(map(str, cmd)), flush=True)
-    r = subprocess.run(cmd, check=check, text=True, cwd=cwd,
-                       stdout=subprocess.PIPE if capture else None)
+def run(*cmd, check=True, capture=False, cwd=None, retries=0):
+    """retries: re-run on failure (network commands hit transient 5xx/timeouts)."""
+    for attempt in range(retries + 1):
+        print("+", " ".join(map(str, cmd)), flush=True)
+        r = subprocess.run(cmd, text=True, cwd=cwd, stdout=subprocess.PIPE if capture else None)
+        if r.returncode == 0 or attempt == retries:
+            break
+        time.sleep(30 * (attempt + 1))
+    if check and r.returncode:
+        raise subprocess.CalledProcessError(r.returncode, cmd, output=r.stdout)
     return r.stdout.strip() if capture else r.returncode
 
 
@@ -164,7 +170,7 @@ def brew_update():
     for t in run("brew", "tap", capture=True).split():
         if not t.startswith("homebrew/") and t != TAP:
             run("brew", "untap", "--force", t, check=False)
-    run("brew", "update")
+    run("brew", "update", retries=2)
     os.environ["HOMEBREW_NO_AUTO_UPDATE"] = "1"  # already updated; keep the run stable
     os.environ["HOMEBREW_NO_INSTALL_CLEANUP"] = "1"
     os.environ["HOMEBREW_NO_AUTOREMOVE"] = "1"  # uninstalling e.g. libssh2 must not drop its deps (openssl@4); brewed curl needs them
@@ -239,13 +245,24 @@ def ensure_alias_links():
         link.symlink_to(target)
 
 
+def publish_asset(tag, path, title, notes):
+    if run("gh", "release", "view", tag, "--repo", REPO, check=False) == 0:
+        for old in run("gh", "release", "view", tag, "--repo", REPO, "--json", "assets", "-q",
+                       ".assets[].name", capture=True).split():
+            if old != path.name:
+                run("gh", "release", "delete-asset", tag, old, "--repo", REPO, "-y", check=False)
+        run("gh", "release", "upload", tag, str(path), "--repo", REPO, "--clobber")
+    else:
+        run("gh", "release", "create", tag, str(path), "--repo", REPO, "--title", title, "--notes", notes)
+
+
 def build(name, mirrored):
     """Build and upload one bottle; leaves bottles/<name>/*.json for the finalize job."""
     ver = tap_version(name)
     tag = release_tag(name, ver)
     ensure_installed_deps(name, mirrored)
     ensure_alias_links()
-    run("brew", "fetch", "--build-from-source", f"{TAP}/{name}")  # fetch first: uninstalling libssh2/openssl@3 breaks brewed curl
+    run("brew", "fetch", "--build-from-source", f"{TAP}/{name}", retries=2)  # fetch first: uninstalling libssh2/openssl@3 breaks brewed curl
     run("brew", "uninstall", "--ignore-dependencies", "--force", name, check=False)
     if name.startswith("openssl"):
         unlink_openssl(name)
@@ -273,17 +290,16 @@ def build(name, mirrored):
     upload = work / "upload"
     upload.mkdir()
     shutil.copy(work / t["local_filename"], upload / asset)
-    if run("gh", "release", "view", tag, "--repo", REPO, check=False) == 0:
-        for old in run("gh", "release", "view", tag, "--repo", REPO, "--json", "assets", "-q",
-                       ".assets[].name", capture=True).split():
-            if old != asset:
-                run("gh", "release", "delete-asset", tag, old, "--repo", REPO, "-y", check=False)
-        run("gh", "release", "upload", tag, str(upload / asset), "--repo", REPO, "--clobber")
-    else:
-        run("gh", "release", "create", tag, str(upload / asset), "--repo", REPO,
-            "--title", f"{name} {ver}", "--notes", f"Intel bottle for {name} {ver} (sequoia).")
+    for attempt in range(3):  # retry as a unit: a 5xx'd create may still have made the release
+        try:
+            publish_asset(tag, upload / asset, f"{name} {ver}", f"Intel bottle for {name} {ver} (sequoia).")
+            break
+        except subprocess.CalledProcessError:
+            if attempt == 2:
+                raise
+            time.sleep(30 * (attempt + 1))
     run("/usr/bin/curl", "-fsSLI", "-o", "/dev/null",
-        f"https://github.com/{REPO}/releases/download/{tag}/{t['filename']}")  # must be downloadable
+        f"https://github.com/{REPO}/releases/download/{tag}/{t['filename']}", retries=2)  # must be downloadable
     out = ROOT / "out"
     out.mkdir(exist_ok=True)
     shutil.copy(js, out / f"{name}.json")
