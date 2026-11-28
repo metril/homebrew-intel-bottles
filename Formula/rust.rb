@@ -6,8 +6,8 @@ class Rust < Formula
   head "https://github.com/rust-lang/rust.git", branch: "main"
 
   stable do
-    url "https://static.rust-lang.org/dist/rustc-1.100.0-src.tar.gz"
-    sha256 "e8904548563117043c24a67c4967119b7c9ed304821988283e7681122ceec98b"
+    url "https://static.rust-lang.org/dist/rustc-1.100.1-src.tar.gz"
+    sha256 "67a6e519b177b5f62cb3685a200527fc0fc685df40a33ca2017f14bafd6bf710"
 
     # From https://github.com/rust-lang/rust/blob/#{version}/src/stage0
     # HEAD does not use these as it needs a nightly rust
@@ -84,8 +84,8 @@ class Rust < Formula
   end
 
   bottle do
-    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/rust-1.100.0"
-    sha256 cellar: :any, sequoia: "6f05f3520549341f9c60ef3fcdd8f48c6d58312b25daf2896ffbdd9c10218b03"
+    root_url "https://github.com/metril/homebrew-intel-bottles/releases/download/rust-1.100.1"
+    sha256 cellar: :any, sequoia: "0ff2dcd97de429d038b6b4c0824e9c63e5bde2a067eec9068235e33c4cbd8a5b"
   end
 
   depends_on "metril/intel-bottles/libgit2"
